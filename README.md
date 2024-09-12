@@ -1,1 +1,2 @@
 # MandelbrotsApple
+Generating mandelbrot set
