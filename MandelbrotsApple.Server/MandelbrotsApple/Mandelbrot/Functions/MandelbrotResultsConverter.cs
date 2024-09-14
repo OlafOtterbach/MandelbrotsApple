@@ -5,10 +5,40 @@
 
     public static class MandelbrotResultsConverter
     {
-        public static MandelbrotResult ImageResult(IEnumerable<byte> image)
-            => new MandelbrotResult(image.ToArray(), Array.Empty<ErrorType>(), false);
+        public static MandelbrotResult ImageResult(byte[] image)
+            => new MandelbrotResult(image.ToImageData(), Array.Empty<ErrorType>(), false);
 
         public static MandelbrotResult ErrorResult(IEnumerable<Error> errors) 
-            => new MandelbrotResult(Array.Empty<byte>(), errors.OfType<ValidationError>().Select(e => e.ErrorType).ToArray(), true);
+            => new MandelbrotResult(Array.Empty<char>(), errors.OfType<ValidationError>().Select(e => e.ErrorType).ToArray(), true);
+
+
+        private static char[] ToImageData(this byte[] image)  => image.SelectMany(ToNibbles).ToArray();
+
+        private static IEnumerable<char> ToNibbles(byte value)
+        {
+            yield return ToHexDigit(value >> 4);
+            yield return ToHexDigit(value & 0x0F);
+        }
+
+        private static char ToHexDigit(int value)
+        =>  value switch
+            {
+                0  => '0',
+                1  => '1',
+                2  => '2',
+                3  => '3',
+                4  => '4',
+                5  => '5',
+                6  => '6',
+                7  => '7',
+                8  => '8',
+                9  => '9',
+                10 => 'A',
+                11 => 'B',
+                12 => 'C',
+                13 => 'D',
+                14 => 'E',
+                _  => 'F'
+            };
     }
 }

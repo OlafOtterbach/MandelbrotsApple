@@ -78,12 +78,27 @@
             var end = DateTime.Now;
             var time = (end - start).TotalMicroseconds;
 
-            Bitmap bitmap = CreateImageFromArgbByteArray(appleMan, parameter.Width, parameter.Height);
+            Bitmap bitmap = CreateImageFromArgbByteArray(ToArgb(appleMan), parameter.Width, parameter.Height);
 
             bitmap.Save(@"c:\tmp\output.png", ImageFormat.Png);
         }
 
-        public static Bitmap CreateImageFromArgbByteArray(byte[] byteArray, int width, int height)
+        private static byte[] ToArgb(byte[] data)
+            => ToArgbSequence(data).ToArray();
+
+
+        private static IEnumerable<byte> ToArgbSequence(byte[] data)
+        {
+            for(var index = 0; index < data.Length; index += 3)
+            {
+                yield return data[index + 2];
+                yield return data[index + 1];
+                yield return data[index];
+                yield return 255;
+            }
+        }
+
+        private static Bitmap CreateImageFromArgbByteArray(byte[] byteArray, int width, int height)
         {
             if (byteArray == null)
                 throw new ArgumentNullException(nameof(byteArray));

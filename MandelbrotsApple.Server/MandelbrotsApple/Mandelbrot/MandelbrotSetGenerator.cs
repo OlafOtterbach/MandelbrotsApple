@@ -13,5 +13,5 @@ public class MandelbrotSetGenerator
         =>  Validate(parameter)
             .Map(MandelbrotSet)
             .Match(ErrorResult, 
-                    ImageResult);
+                   ImageResult);
 }
