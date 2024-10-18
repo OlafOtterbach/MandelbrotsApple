@@ -9,10 +9,10 @@
             => new MandelbrotResult(image.ToImageData(), Array.Empty<ErrorType>(), false);
 
         public static MandelbrotResult ErrorResult(IEnumerable<Error> errors) 
-            => new MandelbrotResult(Array.Empty<char>(), errors.OfType<ValidationError>().Select(e => e.ErrorType).ToArray(), true);
+            => new MandelbrotResult(string.Empty, errors.OfType<ValidationError>().Select(e => e.ErrorType).ToArray(), true);
 
 
-        private static char[] ToImageData(this byte[] image)  => image.SelectMany(ToNibbles).ToArray();
+        private static string ToImageData(this byte[] image)  => new string(image.SelectMany(ToNibbles).ToArray());
 
         private static IEnumerable<char> ToNibbles(byte value)
         {

@@ -1,11 +1,11 @@
 export class MandelbrotParameter {
   constructor(
-    public width: number,
-    public height: number,
-    public xMin: number,
-    public xMax: number,
-    public yMin: number,
-    public yMax: number,
-    public maxIterations: number) {
+    public Width: number,
+    public Height: number,
+    public XMin: number,
+    public XMax: number,
+    public YMin: number,
+    public YMax: number,
+    public MaxIterations: number) {
   }
 }
