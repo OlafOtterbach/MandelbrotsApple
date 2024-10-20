@@ -8,7 +8,7 @@ export class MandelbrotService {
 
   constructor(private mandebrotWebApi: MandelbrotWebApiService) { }
 
-  getGraphics(
+  public async getGraphics(
     width: number,
     height: number,
     xMin: number,
@@ -16,6 +16,25 @@ export class MandelbrotService {
     yMin: number,
     yMax: number,
     maxIterations: number) {
-      this.mandebrotWebApi.getGraphics(width, height, xMin, xMax, yMin, yMax, maxIterations);
+      const result = await this.mandebrotWebApi.getMandelbrotResult(width, height, xMin, xMax, yMin, yMax, maxIterations);
+
   }
+
+  private createImage(imageSource: string, imageTarget: ImageData) {
+    for(index:number; )
+
+  }
+
 }
+
+
+/**
+    this.imageData = this.context.getImageData(0, 0, width, height);
+
+    let map = imageData.data; //new Uint8ClampedArray(width * 4 * height);
+
+
+    var index = (row * width * 4) + (col * 4);
+    [map[index], map[index + 1], map[index + 2], map[index + 3]] = [red, green, blue, 255];
+
+ */

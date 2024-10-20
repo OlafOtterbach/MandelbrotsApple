@@ -12,7 +12,7 @@ export class MandelbrotWebApiService {
 
 constructor(private httpClient: HttpClient) { }
 
-public async getGraphics(
+public async getMandelbrotResult(
   width: number,
   height: number,
   xMin: number,
