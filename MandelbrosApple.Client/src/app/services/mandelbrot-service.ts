@@ -20,9 +20,9 @@ export class MandelbrotService {
 
   }
 
-  private createImage(imageSource: string, imageTarget: ImageData) {
-    for(index:number; )
-
+  public async getImage() : Promise<string> {
+    const imageData = await this.mandebrotWebApi.getMandelbrotImage();
+    return imageData;
   }
 
 }

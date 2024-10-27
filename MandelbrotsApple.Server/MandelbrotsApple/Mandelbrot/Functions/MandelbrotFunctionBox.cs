@@ -13,7 +13,7 @@ public static class MandelbrotFunctionBox
     }
 
 
-    public static byte[] CreateCanvas(int width, int height) => new byte[width * height * 3];
+    public static byte[] CreateCanvas(int width, int height) => new byte[width * height * 4];
 
 
     private static void
@@ -28,12 +28,12 @@ public static class MandelbrotFunctionBox
 
     public static IEnumerable<(int Adress, double Coordinate)>
     YCoordinates(int canvasWidth, int canvasHeight, double yMin, double yMax)
-        => IndicesToCoordinates(canvasWidth * 3, Step(canvasHeight, yMin, yMax), canvasHeight, yMin);
+        => IndicesToCoordinates(canvasWidth * 4, Step(canvasHeight, yMin, yMax), canvasHeight, yMin);
 
 
     public static (int Adress, double Coordinate)[]
     XCoordinates(int canvasWidth, double xMin, double xMax)
-        => IndicesToCoordinates(3, Step(canvasWidth, xMin, xMax), canvasWidth, xMin).ToArray();
+        => IndicesToCoordinates(4, Step(canvasWidth, xMin, xMax), canvasWidth, xMin).ToArray();
 
 
     public static double Step(int size, double min, double max) => (max - min) / (size - 1);
@@ -110,8 +110,9 @@ public static class MandelbrotFunctionBox
 
     private static void SetColor(byte[] canvas, int address, byte red, byte green, byte blue)
     {
-        canvas[address + 0] = red;
-        canvas[address + 1] = green;
-        canvas[address + 2] = blue;
+        canvas[address + 0] = 255;
+        canvas[address + 1] = red;
+        canvas[address + 2] = green;
+        canvas[address + 3] = blue;
     }
 }

@@ -1,4 +1,5 @@
 using MandelbrotsApple.Mandelbrot.Model;
+using Microsoft.AspNetCore.Mvc;
 using static MandelbrotsApple.Mandelbrot.MandelbrotSetGenerator;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,7 @@ var app = builder.Build();
 
 app.UseCors();
 
-app.MapGet("/", () => "Hello Mandelbrot!");
-app.MapPost("/mandelbrot", (MandelbrotParameter request) => Results.Ok(GenerateMandelbrotSet(request)));
+app.MapGet("/image",GetMandelbrotSet);
+
+//app.MapPost("/mandelbrot", (MandelbrotParameter request) => Results.Ok(GenerateMandelbrotSet(request)));
 app.Run("http://localhost:5200");

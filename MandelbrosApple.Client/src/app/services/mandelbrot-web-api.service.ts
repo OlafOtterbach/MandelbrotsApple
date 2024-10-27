@@ -26,4 +26,13 @@ public async getMandelbrotResult(
     const result = await lastValueFrom(this.httpClient.post<MandelbrotResult>(url, requestParam));
     return result;
   }
+
+
+  public async getMandelbrotImage() : Promise<string> {
+    const url = "http://localhost:5200/image";
+    const imageData = await lastValueFrom(this.httpClient.get<string>(url));
+    return imageData;
+  }
+
+
 }
