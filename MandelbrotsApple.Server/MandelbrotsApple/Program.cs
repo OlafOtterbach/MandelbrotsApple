@@ -18,7 +18,5 @@ var app = builder.Build();
 
 app.UseCors();
 
-app.MapGet("/image",GetMandelbrotSet);
-
-//app.MapPost("/mandelbrot", (MandelbrotParameter request) => Results.Ok(GenerateMandelbrotSet(request)));
+app.MapPost("/mandelbrot", (MandelbrotParameter request) => Results.Ok(GenerateMandelbrotSet(request)));
 app.Run("http://localhost:5200");

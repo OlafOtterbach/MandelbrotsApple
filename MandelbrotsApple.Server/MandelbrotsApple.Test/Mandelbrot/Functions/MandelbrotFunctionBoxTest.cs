@@ -89,11 +89,11 @@
 
         private static IEnumerable<byte> ToArgbSequence(byte[] data)
         {
-            for(var index = 0; index < data.Length; index += 4)
+            for (var index = 0; index < data.Length; index += 3)
             {
-                yield return data[index + 3];
                 yield return data[index + 2];
                 yield return data[index + 1];
+                yield return data[index];
                 yield return 255;
             }
         }
@@ -106,7 +106,15 @@
             if (byteArray.Length != width * height * 4)
                 throw new ArgumentException("Byte array length does not match the specified width and height.");
 
+
+            var groupedSequence = byteArray
+                .Select((value, index) => new { value, index })
+                .GroupBy(x => x.index / 4)
+                .Select(g => g.Select(x => x.value).ToList())
+                .ToList();
+
             var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+
             var rect = new Rectangle(0, 0, width, height);
             var bitmapData = bitmap.LockBits(rect, ImageLockMode.WriteOnly, bitmap.PixelFormat);
 

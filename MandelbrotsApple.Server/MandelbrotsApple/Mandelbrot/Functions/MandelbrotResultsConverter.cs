@@ -2,20 +2,9 @@
 {
     using LaYumba.Functional;
     using MandelbrotsApple.Mandelbrot.Model;
-    using static Microsoft.AspNetCore.Http.Results;
-
 
     public static class MandelbrotResultsConverter
     {
-        public static IResult ImageDataResult(byte[] imageData)
-            => Ok(ByteArrayToString(imageData));
-
-        public static IResult ImageErrorResult(IEnumerable<Error> errors)
-            => NoContent();
-
-        private static string ByteArrayToString(byte[] data)
-            => Convert.ToBase64String(data);
-
         public static MandelbrotResult ImageResult(byte[] image)
             => new MandelbrotResult(image.ToImageData(), Array.Empty<ErrorType>(), false);
 
