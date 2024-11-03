@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MandelbrotService } from '../services/mandelbrot-service';
 
 @Component({
@@ -7,29 +7,33 @@ import { MandelbrotService } from '../services/mandelbrot-service';
   templateUrl: './mandelbrot-view.component.html',
   styleUrls: ['./mandelbrot-view.component.css']
 })
-export class MandelbrotViewComponent implements OnInit {
+export class MandelbrotViewComponent implements AfterViewInit {
 
-  @ViewChild('canvasId', { static: false }) canvasRef: ElementRef | undefined = undefined;
+  //@ViewChild('canvasId', { static: false }) canvasRef: ElementRef | undefined = undefined;
+  @ViewChild('canvasId') canvasRef!: ElementRef;
 
 
   constructor(private _mandelbrotService: MandelbrotService) {
 
   }
 
-  async ngOnInit() {
-  }
 
-  async ngAfterViewInit() {
+  ngAfterViewInit() {
+    const canvas = this.canvasRef.nativeElement;
+    const context = canvas.getContext('2d');
     if(this.canvasRef === undefined)
-      return;
+       return;
 
-    const context = this.canvasRef.nativeElement.getContext('2d');
+    console.log("Ahoi");
 
-    if(context === undefined)
-      return;
+    // let context = this.canvasRef.nativeElement.getContext('2d');
 
-    const width = context.canvas.width;
-    const height = context.canvas.height;
+
+    // if(context === undefined)
+    //   return;
+
+    // const width = context.canvas.width;
+    // const height = context.canvas.height;
 
     // let imageData = context.getImageData(0, 0, width, height);
 
