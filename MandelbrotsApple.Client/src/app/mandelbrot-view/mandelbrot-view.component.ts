@@ -10,7 +10,7 @@ import { MandelbrotService } from '../services/mandelbrot-service';
 export class MandelbrotViewComponent implements AfterViewInit {
 
   //@ViewChild('canvasId', { static: false }) canvasRef: ElementRef | undefined = undefined;
-  @ViewChild('canvasId') canvasRef!: ElementRef;
+  @ViewChild('canvasId', { static: false }) canvasRef!: ElementRef;
 
 
   constructor(private _mandelbrotService: MandelbrotService) {
@@ -24,6 +24,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
     let imageData = context.getImageData(0, 0, width, height);
     this._mandelbrotService.getGraphics(imageData, width, height,  0.763, 0.768, 0.0999, 0.103, 255);
 
+    console.log( imageData.data)
     context.putImageData(imageData, 0, 0);
   }
 

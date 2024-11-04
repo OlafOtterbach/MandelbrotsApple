@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'MandelbrosApple.Client' title`, () => {
+  it(`should have the 'MandelbrotsApple.Client' title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('MandelbrosApple.Client');
+    expect(app.title).toEqual('MandelbrotsApple.Client');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, MandelbrosApple.Client');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, MandelbrotsApple.Client');
   });
 });

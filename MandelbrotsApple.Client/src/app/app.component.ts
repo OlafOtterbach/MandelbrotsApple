@@ -10,5 +10,5 @@ import { MandelbrotViewComponent } from './mandelbrot-view/mandelbrot-view.compo
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'MandelbrosApple.Client';
+  title = 'MandelbrotsApple.Client';
 }
