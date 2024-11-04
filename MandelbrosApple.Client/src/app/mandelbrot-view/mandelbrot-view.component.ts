@@ -14,35 +14,17 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
 
   constructor(private _mandelbrotService: MandelbrotService) {
-
   }
-
 
   ngAfterViewInit() {
     const canvas = this.canvasRef.nativeElement;
     const context = canvas.getContext('2d');
-    if(this.canvasRef === undefined)
-       return;
+    const width = context.canvas.width;
+    const height = context.canvas.height;
+    let imageData = context.getImageData(0, 0, width, height);
+    this._mandelbrotService.getGraphics(imageData, width, height,  0.763, 0.768, 0.0999, 0.103, 255);
 
-    console.log("Ahoi");
-
-    // let context = this.canvasRef.nativeElement.getContext('2d');
-
-
-    // if(context === undefined)
-    //   return;
-
-    // const width = context.canvas.width;
-    // const height = context.canvas.height;
-
-    // let imageData = context.getImageData(0, 0, width, height);
-
-    // if(imageData === undefined)
-    //   return;
-
-    // this._mandelbrotService.getGraphics(imageData, width, height,  0.763, 0.768, 0.0999, 0.103, 255);
-
-    //context.putImageData(imageData, 0, 0);
+    context.putImageData(imageData, 0, 0);
   }
 
 }
