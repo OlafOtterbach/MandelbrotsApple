@@ -24,6 +24,7 @@ public async getMandelbrotResult(
 
     const url = "http://localhost:5200/mandelbrot";
     const result = await lastValueFrom(this.httpClient.post<MandelbrotResult>(url, requestParam));
+
     return result;
   }
 }

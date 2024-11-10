@@ -34,7 +34,18 @@ export class MandelbrotService {
           const lowBlue = codedData[i + 5];
           const blue = this.convertToByte(hightBlue, lowBlue);
 
+          if(i <= 12)
+            console.log("Color(" + red + ", " + green + " , " + blue + ")");
+
           [map[index], map[index + 1], map[index + 2], map[index + 3]] = [red, green, blue, 255];
+
+          if(i <= 12)
+            console.log("Map Color(" + map[index] + ", " + map[index+1] + " , " + map[index+2] + ")");
+
+          if(i <= 12)
+            console.log("Ahoi Data Color("+ i + ": " + imageData.data[index] + ", " + imageData.data[index+1] + " , " + imageData.data[index+2] + ")");
+
+
           index += 4;
         }
       }
