@@ -1,7 +1,8 @@
 <div class= "containerFixed" (window:resize)="onResize($event)">
-
-  <p>
-    mandelbrot-view works!
-  </p>
-  <canvas #canvasId width="800" height="600" style="border:1px solid #000000;"></canvas>
+  <canvas #canvasId
+   width="800"
+   height="600"
+   style="border:1px solid #000000;"
+   (wheel)="onWheel($event)"
+  ></canvas>
 </div>
