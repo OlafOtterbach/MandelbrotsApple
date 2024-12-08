@@ -1,5 +1,6 @@
-using MandelbrotsApple.Mandelbrot.Model;
-using static MandelbrotsApple.Mandelbrot.MandelbrotSetGenerator;
+using MandelbrotsApple.ExtendedMandelbrot;
+using Microsoft.AspNetCore.Mvc;
+using static MandelbrotsApple.ExtendedMandelbrot.View;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,5 +19,8 @@ var app = builder.Build();
 app.UseCors();
 
 app.MapGet("/", () => "Hello Mandelbrot!");
-app.MapPost("/mandelbrot", (MandelbrotParameter request) => Results.Ok(GenerateMandelbrotSet(request)));
+app.MapGet("/{width}/{height}/initialize", ([FromRoute] int width, [FromRoute] int height)
+    => Results.Ok(Initialize(new CanvasSize(width, height))));
+//app.MapPost("/initialize", (CanvasSize canvasSize) => Results.Ok(Initialize));
+
 app.Run("http://localhost:5200");
