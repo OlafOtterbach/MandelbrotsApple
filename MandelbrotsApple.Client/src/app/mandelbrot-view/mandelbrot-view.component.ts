@@ -18,26 +18,34 @@ export class MandelbrotViewComponent implements AfterViewInit {
     private canvas: HTMLCanvasElement | undefined;
     private context!: CanvasRenderingContext2D;
     private imageData!: ImageData;
-    private mandelbrotSize: MandelbrotSize;
+    private canvasSize: CanvasSize = new CanvasSize(0, 0);
     private mouseDown: boolean = false;
     private mouseMoved: boolean = false;
     private currentPosition: CanvasPosition = new CanvasPosition(-1, -1);
-
+    private currentMandelbrotSize: MandelbrotSize;
 
     constructor(private _mandelbrotService: MandelbrotService) {
-        this.mandelbrotSize = new MandelbrotSize(
+        this.currentMandelbrotSize = new MandelbrotSize(
             new MandelbrotPosition(0.763, 0.0999),
             new MandelbrotPosition(0.768, 0.103)
         );
     }
 
-    ngAfterViewInit() {
+    async ngAfterViewInit() {
         this.canvas = this.canvasRef.nativeElement as HTMLCanvasElement;
         if (this.canvas && this.canvas.getContext) {
             this.context = this.canvas.getContext('2d')!;
+
+            this.canvasSize = this.getCanvasSize(this.context);
+            this.imageData = this.getImageData(this.canvasSize);
+
+            this.currentMandelbrotSize = await this._mandelbrotService.getInitialMandelbrotSet(this.imageData, this.canvasSize);
+
             this.drawAsync();
         }
     }
+
+
 
     async onMouseDown(event: MouseEvent) {
         if (event.button === 0) {
@@ -49,65 +57,50 @@ export class MandelbrotViewComponent implements AfterViewInit {
     }
 
     onWheel(event: WheelEvent) {
-        const position = this.canvasPosition(event.clientX, event.clientY);
-        this.currentPosition = new CanvasPosition(position.X, position.Y);
-        this.zoomView(event.deltaY, this.currentPosition);
+        // const position = this.canvasPosition(event.clientX, event.clientY);
+        // this.currentPosition = new CanvasPosition(position.X, position.Y);
+        // this.zoomView(event.deltaY, this.currentPosition);
 
-        event.stopPropagation();
-        event.preventDefault();
+        // event.stopPropagation();
+        // event.preventDefault();
     }
 
-    private zoomView(
-        delta: number,
-        mousePosition: CanvasPosition,
-    ) {
-        if (this.canvas === undefined) return;
+    // private zoomView(delta: number, mousePosition: CanvasPosition) {
+    //     if (this.canvas === undefined) return;
 
-        if (this.context === undefined) return;
+    //     if (this.context === undefined) return;
 
-        const canvasSize = this.canvasSize();
+    //     const canvasSize = this.getCanvasSize();
 
-        const zoomFactor = delta < 0 ? 1.01 : 0.99;
+    //     const zoomFactor = delta < 0 ? 1.01 : 0.99;
 
-        this.mandelbrotSize = this.zoomService(mousePosition, canvasSize, this.mandelbrotSize, zoomFactor);
+    //     this.mandelbrotSize = this.zoomService(
+    //         mousePosition,
+    //         canvasSize,
+    //         this.mandelbrotSize,
+    //         zoomFactor
+    //     );
 
-        this.drawAsync();
-    }
+    //     this.drawAsync();
+    // }
 
     private async drawAsync() {
-        const canvasSize = this.canvasSize();
-        this.imageData = this.context.getImageData(
-            0,
-            0,
-            canvasSize.Width,
-            canvasSize.Height
-        );
-        await this._mandelbrotService.getGraphics(
-            this.imageData,
-            canvasSize,
-            this.mandelbrotSize.Min,
-            this.mandelbrotSize.Max,
-            255
-        );
         this.context.putImageData(
             this.imageData,
             0,
             0,
             0,
             0,
-            canvasSize.Width,
-            canvasSize.Height
+            this.canvasSize.Width,
+            this.canvasSize.Height
         );
     }
 
     public onResize(_: Event) {
-        this.drawAsync();
-    }
+        this.canvasSize = this.getCanvasSize(this.context);
+        this.imageData = this.getImageData(this.canvasSize);
 
-    private canvasSize(): CanvasSize {
-        const width = this.context.canvas.width;
-        const height = this.context.canvas.height;
-        return new CanvasSize(width, height);
+        this.drawAsync();
     }
 
     private canvasPosition(
@@ -130,7 +123,6 @@ export class MandelbrotViewComponent implements AfterViewInit {
         mandelbrotSize: MandelbrotSize,
         zoomFactor: number
     ): MandelbrotSize {
-
         const startMandelBrotPosition =
             this._mandelbrotService.MandelbrotPosition(
                 mousePosition,
@@ -148,7 +140,25 @@ export class MandelbrotViewComponent implements AfterViewInit {
         const newXMax = xMax * zoomFactor + startMandelBrotPosition.X;
         const newYMax = yMax * zoomFactor + startMandelBrotPosition.Y;
 
-        const zoomedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));
+        const zoomedMandelbrotSize = new MandelbrotSize(
+            new MandelbrotPosition(newXMin, newYMin),
+            new MandelbrotPosition(newXMax, newYMax)
+        );
         return zoomedMandelbrotSize;
+    }
+
+    private getImageData(canvasSize: CanvasSize): ImageData {
+        return this.context.getImageData(
+            0,
+            0,
+            canvasSize.Width,
+            canvasSize.Height
+        );
+    }
+
+    private getCanvasSize(context: CanvasRenderingContext2D): CanvasSize {
+        const width = context.canvas.width;
+        const height = context.canvas.height;
+        return new CanvasSize(width, height);
     }
 }

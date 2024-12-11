@@ -4,6 +4,7 @@ import { CanvasSize } from '../model/canvas-size';
 import { CanvasPosition } from '../model/canvas-position';
 import { MandelbrotPosition } from '../model/mandelbrot-position';
 import { MandelbrotSize } from '../model/mandelbrot-size';
+import { MandelbrotResult } from '../model/mandelbrot-result';
 
 @Injectable({
     providedIn: 'root',
@@ -11,47 +12,37 @@ import { MandelbrotSize } from '../model/mandelbrot-size';
 export class MandelbrotService {
     constructor(private mandebrotWebApi: MandelbrotWebApiService) {}
 
-    public async getGraphics(
-        imageData: ImageData,
-        canvasSize: CanvasSize,
-        min: MandelbrotPosition,
-        max: MandelbrotPosition,
-        maxIterations: number
-    ) {
-        const result = await this.mandebrotWebApi.getMandelbrotResult(
-            canvasSize.Width,
-            canvasSize.Height,
-            min.X,
-            max.X,
-            min.Y,
-            max.Y,
-            maxIterations
-        );
+    public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<MandelbrotSize> {
+        const result = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
+        this.mapMandelbrotResult(result, imageData.data);
+        return result.mandelbrotSize;
+    }
 
-        if (!result.hasErrors) {
-            const map = imageData.data;
-            let index = 0;
-            const codedData = result.imageData;
-            for (let i = 0; i < codedData.length; i += 6) {
-                const hightRed = codedData[i];
-                const lowRed = codedData[i + 1];
-                const red = this.convertToByte(hightRed, lowRed);
-                const hightGreen = codedData[i + 2];
-                const lowGreen = codedData[i + 3];
-                const green = this.convertToByte(hightGreen, lowGreen);
-                const hightBlue = codedData[i + 4];
-                const lowBlue = codedData[i + 5];
-                const blue = this.convertToByte(hightBlue, lowBlue);
-                [map[index], map[index + 1], map[index + 2], map[index + 3]] = [
-                    red,
-                    green,
-                    blue,
-                    255,
-                ];
-                index += 4;
-            }
+
+
+    private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
+        let index = 0;
+        const codedData = mandelbrotResult.imageData;
+        for (let i = 0; i < codedData.length; i += 6) {
+            const hightRed = codedData[i];
+            const lowRed = codedData[i + 1];
+            const red = this.convertToByte(hightRed, lowRed);
+            const hightGreen = codedData[i + 2];
+            const lowGreen = codedData[i + 3];
+            const green = this.convertToByte(hightGreen, lowGreen);
+            const hightBlue = codedData[i + 4];
+            const lowBlue = codedData[i + 5];
+            const blue = this.convertToByte(hightBlue, lowBlue);
+            [map[index], map[index + 1], map[index + 2], map[index + 3]] = [
+                red,
+                green,
+                blue,
+                255,
+            ];
+            index += 4;
         }
     }
+
 
     private convertToByte(hight: string, low: string): number {
         const value =
