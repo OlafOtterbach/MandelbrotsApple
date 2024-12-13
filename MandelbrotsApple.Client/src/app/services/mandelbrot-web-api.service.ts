@@ -1,3 +1,4 @@
+import { MandelbrotParameter } from './../model/mandelbrot-parameter';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
@@ -16,6 +17,14 @@ export class MandelbrotWebApiService {
     : Promise<MandelbrotResult> {
         const url = `http://localhost:5200/${width}/${height}/initialize`;
         const result = await lastValueFrom(this.httpClient.get<MandelbrotResult>(url));
+        return result;
+    }
+
+    public async getRefreshedMandelbrotSet(
+        parameter: MandelbrotParameter)
+    : Promise<MandelbrotResult> {
+        const url = `http://localhost:5200/refresh`;
+        const result = await lastValueFrom(this.httpClient.post<MandelbrotResult>(url, parameter));
         return result;
     }
 }

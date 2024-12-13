@@ -5,6 +5,7 @@ import { CanvasPosition } from '../model/canvas-position';
 import { MandelbrotPosition } from '../model/mandelbrot-position';
 import { MandelbrotSize } from '../model/mandelbrot-size';
 import { MandelbrotResult } from '../model/mandelbrot-result';
+import { MandelbrotParameter } from '../model/mandelbrot-parameter';
 
 @Injectable({
     providedIn: 'root',
@@ -13,11 +14,28 @@ export class MandelbrotService {
     constructor(private mandebrotWebApi: MandelbrotWebApiService) {}
 
     public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<MandelbrotSize> {
-        const result = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
-        this.mapMandelbrotResult(result, imageData.data);
+        const result
+            = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
+        if(!result.hasErrors)
+            this.mapMandelbrotResult(result, imageData.data);
+
         return result.mandelbrotSize;
     }
 
+
+    public async getRefreshedMandelbrotSet(
+        imageData: ImageData,
+        canvasSize: CanvasSize,
+        mandelbrotSize: MandelbrotSize)
+    : Promise<MandelbrotSize> {
+        const parameter = new MandelbrotParameter(canvasSize, mandelbrotSize, 255);
+        const result = await this.mandebrotWebApi.getRefreshedMandelbrotSet(parameter);
+        if(result.hasErrors)
+            return mandelbrotSize;
+
+        this.mapMandelbrotResult(result, imageData.data);
+        return result.mandelbrotSize;
+    }
 
 
     private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {

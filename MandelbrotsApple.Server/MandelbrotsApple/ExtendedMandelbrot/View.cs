@@ -14,6 +14,9 @@ public static class View
         return result;
     }
 
+    public static MandelbrotResult Refresh(MandelbrotParameter parameter)
+        => GenerateMandelbrotSet(parameter);
+
     public static MandelbrotResult ZoomIn()
     {
         return new MandelbrotResult();
