@@ -1,6 +1,5 @@
 import { MandelbrotPosition } from './mandelbrot-position';
 
-
 export class MandelbrotSize {
     constructor(public Min: MandelbrotPosition, public Max: MandelbrotPosition) {}
 

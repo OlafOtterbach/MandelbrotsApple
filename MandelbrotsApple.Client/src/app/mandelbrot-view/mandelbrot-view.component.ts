@@ -17,12 +17,14 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
     private canvas: HTMLCanvasElement | undefined;
     private context!: CanvasRenderingContext2D;
+
     private imageData!: ImageData;
     private canvasSize: CanvasSize = new CanvasSize(0, 0);
+    private currentMandelbrotSize: MandelbrotSize;
+
     private mouseDown: boolean = false;
     private mouseMoved: boolean = false;
     private currentPosition: CanvasPosition = new CanvasPosition(-1, -1);
-    private currentMandelbrotSize: MandelbrotSize;
 
     constructor(private _mandelbrotService: MandelbrotService) {
         this.currentMandelbrotSize = new MandelbrotSize(
@@ -31,16 +33,15 @@ export class MandelbrotViewComponent implements AfterViewInit {
         );
     }
 
+
+
     async ngAfterViewInit() {
         this.canvas = this.canvasRef.nativeElement as HTMLCanvasElement;
         if (this.canvas && this.canvas.getContext) {
             this.context = this.canvas.getContext('2d')!;
 
-            this.canvasSize = this.getCanvasSize(this.context);
-            this.imageData = this.getImageData(this.canvasSize);
-
+            this.updateCanvasData();
             this.currentMandelbrotSize = await this._mandelbrotService.getInitialMandelbrotSet(this.imageData, this.canvasSize);
-
             this.drawAsync();
         }
     }
@@ -96,10 +97,9 @@ export class MandelbrotViewComponent implements AfterViewInit {
         );
     }
 
-    public onResize(_: Event) {
-        this.canvasSize = this.getCanvasSize(this.context);
-        this.imageData = this.getImageData(this.canvasSize);
-
+    public async onResize(_: Event) {
+        this.updateCanvasData();
+        this.currentMandelbrotSize = await this._mandelbrotService.getRefreshedMandelbrotSet(this.imageData, this.canvasSize, this.currentMandelbrotSize);
         this.drawAsync();
     }
 
@@ -147,6 +147,23 @@ export class MandelbrotViewComponent implements AfterViewInit {
         return zoomedMandelbrotSize;
     }
 
+
+
+
+    private updateCanvasData() {
+        const newCanvasSize = this.getCanvasSize(this.context);
+        if(newCanvasSize.Width != this.canvasSize.Width && newCanvasSize.Height != this.canvasSize.Height) {
+            this.canvasSize = newCanvasSize;
+            this.imageData = this.getImageData(this.canvasSize);
+        }
+    }
+
+    private getCanvasSize(context: CanvasRenderingContext2D): CanvasSize {
+        const width = context.canvas.width;
+        const height = context.canvas.height;
+        return new CanvasSize(width, height);
+    }
+
     private getImageData(canvasSize: CanvasSize): ImageData {
         return this.context.getImageData(
             0,
@@ -154,11 +171,5 @@ export class MandelbrotViewComponent implements AfterViewInit {
             canvasSize.Width,
             canvasSize.Height
         );
-    }
-
-    private getCanvasSize(context: CanvasRenderingContext2D): CanvasSize {
-        const width = context.canvas.width;
-        const height = context.canvas.height;
-        return new CanvasSize(width, height);
     }
 }

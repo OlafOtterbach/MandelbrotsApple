@@ -1,8 +1,17 @@
 using MandelbrotsApple.ExtendedMandelbrot;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using static MandelbrotsApple.ExtendedMandelbrot.View;
 
+var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Configure JSON serializer options
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+});
 
 builder.Services.AddCors(options =>
 {
@@ -14,6 +23,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 var app = builder.Build();
 
 app.UseCors();
@@ -22,10 +32,13 @@ app.MapGet("/", () => "Hello Mandelbrot!");
 
 app.MapGet(
     "/{width}/{height}/initialize",
-    ([FromRoute] int width, [FromRoute] int height) => Results.Ok(Initialize(new CanvasSize(width, height))));
+    ([FromRoute] int width, [FromRoute] int height) 
+        => Results.Json(Initialize(new CanvasSize(width, height)), jsonOptions));
 
 app.MapPost(
     "/refresh",
-    ([FromBody] MandelbrotParameter parameter) => Results.Ok(Refresh));
+    ([FromBody] MandelbrotParameter parameter)
+        => Results.Json(Refresh(parameter), jsonOptions));
+
 
 app.Run("http://localhost:5200");

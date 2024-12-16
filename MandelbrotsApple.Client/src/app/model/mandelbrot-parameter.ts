@@ -5,6 +5,6 @@ export class MandelbrotParameter {
   constructor(
     public CanvasSize: CanvasSize,
     public CurrentMandelbrotSize: MandelbrotSize,
-    public MaxIterations: number) {
+    public MxIterations: number) {
   }
 }

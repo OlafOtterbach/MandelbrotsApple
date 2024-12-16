@@ -16,10 +16,10 @@ export class MandelbrotService {
     public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<MandelbrotSize> {
         const result
             = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
-        if(!result.hasErrors)
+        if(!result.HasErrors)
             this.mapMandelbrotResult(result, imageData.data);
 
-        return result.mandelbrotSize;
+        return result.MandelbrotSize;
     }
 
 
@@ -30,17 +30,17 @@ export class MandelbrotService {
     : Promise<MandelbrotSize> {
         const parameter = new MandelbrotParameter(canvasSize, mandelbrotSize, 255);
         const result = await this.mandebrotWebApi.getRefreshedMandelbrotSet(parameter);
-        if(result.hasErrors)
+        if(result.HasErrors)
             return mandelbrotSize;
 
         this.mapMandelbrotResult(result, imageData.data);
-        return result.mandelbrotSize;
+        return result.MandelbrotSize;
     }
 
 
     private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
         let index = 0;
-        const codedData = mandelbrotResult.imageData;
+        const codedData = mandelbrotResult.ImageData;
         for (let i = 0; i < codedData.length; i += 6) {
             const hightRed = codedData[i];
             const lowRed = codedData[i + 1];
