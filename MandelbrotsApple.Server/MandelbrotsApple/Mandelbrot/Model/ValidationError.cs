@@ -1,6 +1,6 @@
-﻿namespace MandelbrotsApple.Mandelbrot.Model;
+﻿//namespace MandelbrotsApple.Mandelbrot.Model;
 
-using LaYumba.Functional;
+//using LaYumba.Functional;
 
-public record ValidationError(ErrorType ErrorType) : Error(ErrorType.ToString());
+//public record ValidationError(ErrorType ErrorType) : Error(ErrorType.ToString());
 

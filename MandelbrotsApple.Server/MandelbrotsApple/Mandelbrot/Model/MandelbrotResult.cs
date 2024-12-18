@@ -1,4 +1,4 @@
-﻿namespace MandelbrotsApple.Mandelbrot.Model;
+﻿//namespace MandelbrotsApple.Mandelbrot.Model;
 
-public record MandelbrotResult(string ImageData, ErrorType[] Errors, bool HasErrors);
+//public record MandelbrotResult(string ImageData, ErrorType[] Errors, bool HasErrors);
 

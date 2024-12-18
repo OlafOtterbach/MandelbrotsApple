@@ -22,6 +22,8 @@ public readonly record struct MandelbrotSize(MandelbrotPosition Min, MandelbrotP
 
 public readonly record struct MandelbrotParameter(CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
+public readonly record struct MandelbrotZoomParameter(CanvasPosition MousePosition, CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int Delta, int MaxIterations);
+
 public readonly record struct MandelbrotResult(string ImageData, MandelbrotSize MandelbrotSize, ErrorType[] Errors, bool HasErrors);
 
 
