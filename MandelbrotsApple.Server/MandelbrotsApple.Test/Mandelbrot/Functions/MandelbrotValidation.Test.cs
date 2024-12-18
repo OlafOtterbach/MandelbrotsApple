@@ -17,44 +17,44 @@ public class ValidationTest
         Assert.True(result.IsValid);
     }
 
-    //[Fact]
-    //public void Validate_Difference_Between_XMin_XMax_Test__Difference_exist_not()
-    //{
-    //    // Arrange
-    //    var parameter = new MandelbrotParameter(320, 200, 2.0, 2.000000001, -2.0, 2.0, 255);
+    [Fact]
+    public void Validate_Difference_Between_XMin_XMax_Test__Difference_exist_not()
+    {
+        // Arrange
+        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, -2.0), new MandelbrotPosition(2.000000001, 2.0)), 255);
 
-    //    // Act
-    //    var result = Validation.Validate_Difference_Between_XMin_XMax(parameter);
+        // Act
+        var result = Validation.Validate_Difference_Between_XMin_XMax(parameter);
 
-    //    // Assert
-    //    Assert.False(result.IsValid);
-    //}
+        // Assert
+        Assert.False(result.IsValid);
+    }
 
-    //[Fact]
-    //public void Validate_Difference_Between_YMin_YMax_Test__Difference_exist()
-    //{
-    //    // Arrange
-    //    var parameter = new MandelbrotParameter(320, 200, 2.0, -2.0, 2.0, -2.0, 255);
+    [Fact]
+    public void Validate_Difference_Between_YMin_YMax_Test__Difference_exist()
+    {
+        // Arrange
+        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, 2.0), new MandelbrotPosition(-2.0, -2.0)), 255);
 
-    //    // Act
-    //    var result = Validation.Validate_Difference_Between_YMin_YMax(parameter);
+        // Act
+        var result = Validation.Validate_Difference_Between_YMin_YMax(parameter);
 
-    //    // Assert
-    //    Assert.True(result.IsValid);
-    //}
+        // Assert
+        Assert.True(result.IsValid);
+    }
 
-    //[Fact]
-    //public void Validate_Difference_Between_YMin_YMax_Test__Difference_exist_not()
-    //{
-    //    // Arrange
-    //    var parameter = new MandelbrotParameter(320, 200, -2.0, 2.0, 2.0, 2.0000000001, 255);
+    [Fact]
+    public void Validate_Difference_Between_YMin_YMax_Test__Difference_exist_not()
+    {
+        // Arrange
+        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(-2.0, 2.0), new MandelbrotPosition(2.0, 2.0000000001)), 255);
 
-    //    // Act
-    //    var result = Validation.Validate_Difference_Between_YMin_YMax(parameter);
+        // Act
+        var result = Validation.Validate_Difference_Between_YMin_YMax(parameter);
 
-    //    // Assert
-    //    Assert.False(result.IsValid);
-    //}
+        // Assert
+        Assert.False(result.IsValid);
+    }
 
 
     //[Fact]
