@@ -1,4 +1,4 @@
-﻿using MandelbrotsApple.ExtendedMandelbrot;
+﻿using MandelbrotsApple.Mandelbrot;
 
 namespace MandelbrotsApple.Server.Test.Mandelbrot;
 

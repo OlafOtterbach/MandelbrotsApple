@@ -1,4 +1,4 @@
-﻿namespace MandelbrotsApple.ExtendedMandelbrot;
+﻿namespace MandelbrotsApple.Mandelbrot;
 
 using LaYumba.Functional;
 using static LaYumba.Functional.F;

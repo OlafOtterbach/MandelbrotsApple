@@ -1,7 +1,7 @@
-using MandelbrotsApple.ExtendedMandelbrot;
+using MandelbrotsApple.Mandelbrot;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using static MandelbrotsApple.ExtendedMandelbrot.View;
+using static MandelbrotsApple.Mandelbrot.View;
 
 var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null };
 var builder = WebApplication.CreateBuilder(args);

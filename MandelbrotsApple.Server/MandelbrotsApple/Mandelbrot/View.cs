@@ -1,4 +1,4 @@
-﻿namespace MandelbrotsApple.ExtendedMandelbrot;
+﻿namespace MandelbrotsApple.Mandelbrot;
 
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Reflection.Metadata;

@@ -1,4 +1,4 @@
-﻿namespace MandelbrotsApple.ExtendedMandelbrot;
+﻿namespace MandelbrotsApple.Mandelbrot;
 
 
 public static class Errors
