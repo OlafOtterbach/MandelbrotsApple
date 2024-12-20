@@ -1,10 +1,6 @@
 ﻿namespace MandelbrotsApple.Mandelbrot;
-
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Reflection.Metadata;
+using LaYumba.Functional;
 using static Production;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 
 public static class View
 {
@@ -21,33 +17,23 @@ public static class View
         => GenerateMandelbrotSet(parameter);
 
     public static MandelbrotResult Zoom(MandelbrotZoomParameter zoomParameter)
-         => GenerateMandelbrotSet(Zooming(zoomParameter));
-
-
-
-
-    public static MandelbrotPosition MandelbrotPosition(CanvasPosition canvasPosition, CanvasSize canvasSize, MandelbrotSize mandelbrotSize)
     {
-        var mandelbrotMin = mandelbrotSize.Min;
-        var mandelbrotMax = mandelbrotSize.Max;
-        var mandelbrotX = mandelbrotMin.X + canvasPosition.X * (mandelbrotMax.X - mandelbrotMin.X) / (canvasSize.Width - 1);
-        var mandelbrotY = mandelbrotMin.Y + canvasPosition.Y * (mandelbrotMax.Y - mandelbrotMin.Y) / (canvasSize.Height - 1);
-
-        return new MandelbrotPosition(mandelbrotX, mandelbrotY);
+        var result = zoomParameter
+                   .ValidateMandelbrotZoomParameter()
+                   .Map(Zooming)
+                   .GenerateMandelbrotSet();
+        return result;
     }
 
 
-    public static CanvasPosition CanvasPosition(MandelbrotPosition mandelbrotPosition, CanvasSize canvasSize, MandelbrotSize mandelbrotSize)
-    {
-        var mandelbrotMin = mandelbrotSize.Min;
-        var mandelbrotMax = mandelbrotSize.Max;
-        var canvasX = (mandelbrotPosition.X - mandelbrotMin.X) * (canvasSize.Width - 1) / (mandelbrotMax.X - mandelbrotMin.X);
-        var canvasY = (mandelbrotPosition.Y - mandelbrotMin.Y) * (canvasSize.Height - 1) / (mandelbrotMax.Y - mandelbrotMin.Y);
 
-        return new CanvasPosition(canvasX, canvasY);
-    }
 
-    private static MandelbrotParameter Zooming(MandelbrotZoomParameter zoomParameter)
+
+
+
+
+
+    private static MandelbrotParameter Zooming(this MandelbrotZoomParameter zoomParameter)
     {
         var mousePosition = zoomParameter.MousePosition;
         var canvasSize = zoomParameter.CanvasSize;
@@ -71,5 +57,26 @@ public static class View
         var zoomedMandelbrotParameter = new MandelbrotParameter(canvasSize, zoomedMandelbrotSize, zoomParameter.MaxIterations); 
 
         return zoomedMandelbrotParameter;
+    }
+
+    public static MandelbrotPosition MandelbrotPosition(CanvasPosition canvasPosition, CanvasSize canvasSize, MandelbrotSize mandelbrotSize)
+    {
+        var mandelbrotMin = mandelbrotSize.Min;
+        var mandelbrotMax = mandelbrotSize.Max;
+        var mandelbrotX = mandelbrotMin.X + canvasPosition.X * (mandelbrotMax.X - mandelbrotMin.X) / (canvasSize.Width - 1);
+        var mandelbrotY = mandelbrotMin.Y + canvasPosition.Y * (mandelbrotMax.Y - mandelbrotMin.Y) / (canvasSize.Height - 1);
+
+        return new MandelbrotPosition(mandelbrotX, mandelbrotY);
+    }
+
+
+    public static CanvasPosition CanvasPosition(MandelbrotPosition mandelbrotPosition, CanvasSize canvasSize, MandelbrotSize mandelbrotSize)
+    {
+        var mandelbrotMin = mandelbrotSize.Min;
+        var mandelbrotMax = mandelbrotSize.Max;
+        var canvasX = (mandelbrotPosition.X - mandelbrotMin.X) * (canvasSize.Width - 1) / (mandelbrotMax.X - mandelbrotMin.X);
+        var canvasY = (mandelbrotPosition.Y - mandelbrotMin.Y) * (canvasSize.Height - 1) / (mandelbrotMax.Y - mandelbrotMin.Y);
+
+        return new CanvasPosition(canvasX, canvasY);
     }
 }

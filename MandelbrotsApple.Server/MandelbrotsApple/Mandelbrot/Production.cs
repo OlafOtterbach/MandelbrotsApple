@@ -9,7 +9,18 @@ public static class Production
 {
     public static MandelbrotResult GenerateMandelbrotSet(MandelbrotParameter parameter)
          => Validate(parameter)
-             .Map(MandelbrotSet)
-             .Match(ErrorResult,
-                    (ImageResult.Apply(parameter.CurrentMandelbrotSize)));
+            .Map(MandelbrotSet)
+            .Match(ErrorResult,
+                   validResult => validResult);
+
+
+    public static MandelbrotResult GenerateMandelbrotSet(this Validation<MandelbrotParameter> validatedParameter)
+         => validatedParameter
+            .Bind(Validate)
+            .Map(MandelbrotSet)
+            .Match(ErrorResult,
+                   validResult => validResult);
+
+    private static MandelbrotResult MandelbrotSet(MandelbrotParameter parameter)
+        => ImageResult(parameter.CurrentMandelbrotSize, MandelbrotImage(parameter));
 }

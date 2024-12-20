@@ -4,7 +4,7 @@ using LaYumba.Functional;
 
 public class Generating
 {
-    public static byte[] MandelbrotSet(MandelbrotParameter parameter)
+    public static byte[] MandelbrotImage(MandelbrotParameter parameter)
     {
         var canvas = CreateCanvas(parameter.CanvasSize);
         MandelbrotSet(

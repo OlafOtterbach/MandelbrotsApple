@@ -58,7 +58,10 @@ export class MandelbrotViewComponent implements AfterViewInit {
     }
 
     onWheel(event: WheelEvent) {
-        // const position = this.canvasPosition(event.clientX, event.clientY);
+        const position = this.canvasPosition(event.clientX, event.clientY);
+        const delta = event.deltaY;
+
+
         // this.currentPosition = new CanvasPosition(position.X, position.Y);
         // this.zoomView(event.deltaY, this.currentPosition);
 

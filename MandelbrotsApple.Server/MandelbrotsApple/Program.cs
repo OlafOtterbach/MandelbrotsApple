@@ -40,5 +40,10 @@ app.MapPost(
     ([FromBody] MandelbrotParameter parameter)
         => Results.Json(Refresh(parameter), jsonOptions));
 
+app.MapPost(
+    "/zoom",
+    ([FromBody] MandelbrotZoomParameter zoomParameter)
+        => Results.Json(Zoom(zoomParameter), jsonOptions));
+
 
 app.Run("http://localhost:5200");

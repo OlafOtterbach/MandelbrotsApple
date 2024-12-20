@@ -8,7 +8,19 @@ public static class Validation
 {
     private static readonly double EPSILON = 0.0000001;
 
-    public static Func<Option<MandelbrotParameter>, Validation<MandelbrotParameter>>
+
+    public static Validation<MandelbrotZoomParameter> ValidateMandelbrotZoomParameter(this MandelbrotZoomParameter zoomParameter)
+      => zoomParameter.ToMandelbrotParameter().ValidateMandelbrotParameter().Map(param => zoomParameter);
+
+    private static MandelbrotParameter ToMandelbrotParameter(this MandelbrotZoomParameter zoomParameter)
+        => new MandelbrotParameter(zoomParameter.CanvasSize, zoomParameter.CurrentMandelbrotSize, zoomParameter.MaxIterations);
+
+
+
+
+    public static Validation<MandelbrotParameter> ValidateMandelbrotParameter(this MandelbrotParameter parameter) => Validate(parameter);
+
+    public static Func<MandelbrotParameter, Validation<MandelbrotParameter>>
     Validate
         => ValidateWithValidators(
                 Validate_Width_Minimum,
@@ -22,22 +34,18 @@ public static class Validation
                 Validate_Iteration_Minimum,
                 Validate_Iteration_Maximum);
 
-    private static Func<Option<MandelbrotParameter>, Validation<MandelbrotParameter>>
+    private static Func<MandelbrotParameter, Validation<MandelbrotParameter>>
     ValidateWithValidators(params Func<MandelbrotParameter, Validation<MandelbrotParameter>>[] validators)
-        => op => op.Match(
-                            () => Invalid(ParameterIsNullError),
-                            p =>
-                            {
-                                var errors = validators
-                                            .Map(validate => validate(p))
-                                            .Bind(validation => validation.Match(
-                                                                            Invalid: errs => Some(errs),
-                                                                            Valid: _ => None))
-                                            .ToList();
-                                return errors.Any() ? Invalid(errors.Flatten()) : Valid(p);
-                            }
-                        );
-
+        => parameter =>
+           {
+               var errors = validators
+                           .Map(validate => validate(parameter))
+                           .Bind(validation => validation.Match(
+                                                           Invalid: errs => Some(errs),
+                                                           Valid: _ => None))
+                           .ToList();
+               return errors.Any() ? Invalid(errors.Flatten()) : Valid(parameter);
+           };
 
 
 
