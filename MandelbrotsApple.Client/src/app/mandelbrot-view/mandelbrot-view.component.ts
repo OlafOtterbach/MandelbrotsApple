@@ -49,11 +49,34 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
 
     async onMouseDown(event: MouseEvent) {
-        if (event.button === 0) {
+        if (event.buttons !== 0) {
             const position = this.canvasPosition(event.clientX, event.clientY);
             this.currentPosition = new CanvasPosition(position.X, position.Y);
             this.mouseDown = true;
             this.mouseMoved = false;
+        }
+    }
+
+    async onMouseUp() {
+        this.mouseDown = false;
+        this.mouseMoved = false;
+    }
+
+    async onMouseMove(event: MouseEvent) {
+        if (this.mouseDown == true) {
+            this.mouseMoved = true;
+            const position = this.canvasPosition(event.clientX, event.clientY);
+
+            this.updateCanvasData();
+            const startPosition = this.currentPosition;
+            const endPosition = this.canvasPosition(event.clientX, event.clientY);
+            this.currentPosition = endPosition;
+
+            this.currentMandelbrotSize = await this._mandelbrotService.moveMandelbrotSet(this.imageData, startPosition, endPosition, this.canvasSize, this.currentMandelbrotSize);
+            this.drawAsync();
+
+            event.stopPropagation();
+            event.preventDefault();
         }
     }
 
@@ -83,7 +106,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
     public async onResize(_: Event) {
         this.updateCanvasData();
-        this.currentMandelbrotSize = await this._mandelbrotService.getRefreshedMandelbrotSet(this.imageData, this.canvasSize, this.currentMandelbrotSize);
+        this.currentMandelbrotSize = await this._mandelbrotService.refreshedMandelbrotSet(this.imageData, this.canvasSize, this.currentMandelbrotSize);
         this.drawAsync();
     }
 

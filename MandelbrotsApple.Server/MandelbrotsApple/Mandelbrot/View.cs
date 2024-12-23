@@ -47,7 +47,7 @@ public static class View
         var mousePosition = zoomParameter.MousePosition;
         var canvasSize = zoomParameter.CanvasSize;
         var mandelbrotSize = zoomParameter.CurrentMandelbrotSize;
-        var zoomFactor = zoomParameter.Delta > 0 ? 0.9 : 1.1;
+        var zoomFactor = zoomParameter.ZoomIn ? 0.9 : 1.1;
 
         var startMandelBrotPosition = MandelbrotPosition(mousePosition, canvasSize, mandelbrotSize);
 

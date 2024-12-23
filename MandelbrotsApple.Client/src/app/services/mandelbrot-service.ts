@@ -7,6 +7,8 @@ import { MandelbrotSize } from '../model/mandelbrot-size';
 import { MandelbrotResult } from '../model/mandelbrot-result';
 import { MandelbrotParameter } from '../model/mandelbrot-parameter';
 import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
+import { CanvasVector } from '../model/canvas-vector';
+import { MandelbrotMoveParameter } from '../model/mandelbrot-move-parameter';
 
 @Injectable({
     providedIn: 'root',
@@ -24,7 +26,7 @@ export class MandelbrotService {
     }
 
 
-    public async getRefreshedMandelbrotSet(
+    public async refreshedMandelbrotSet(
         imageData: ImageData,
         canvasSize: CanvasSize,
         mandelbrotSize: MandelbrotSize)
@@ -45,7 +47,8 @@ export class MandelbrotService {
         canvasSize: CanvasSize,
         mandelbrotSize: MandelbrotSize)
     : Promise<MandelbrotSize> {
-        const zoomParameter = new MandelbrotZoomParameter(mousePosition, delta > 0, canvasSize, mandelbrotSize, 255);
+        const zoomIn = delta > 0;
+        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, canvasSize, mandelbrotSize, 255);
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
         if(result.HasErrors)
             return mandelbrotSize;
@@ -53,6 +56,30 @@ export class MandelbrotService {
         this.mapMandelbrotResult(result, imageData.data);
         return result.MandelbrotSize;
     }
+
+    public async moveMandelbrotSet(
+        imageData: ImageData,
+        startPosition: CanvasPosition,
+        endPosition: CanvasPosition,
+        canvasSize: CanvasSize,
+        mandelbrotSize: MandelbrotSize)
+    : Promise<MandelbrotSize> {
+        const vx = endPosition.X - startPosition.X;
+        const vy = endPosition.Y - startPosition.Y;
+        const mouseVector = new CanvasVector(vx, vy);
+
+        const zoomParameter = new MandelbrotMoveParameter(mouseVector, canvasSize, mandelbrotSize, 255);
+        const result = await this.mandebrotWebApi.moveMandelbrotSet(zoomParameter);
+        if(result.HasErrors)
+            return mandelbrotSize;
+
+        this.mapMandelbrotResult(result, imageData.data);
+        return result.MandelbrotSize;
+    }
+
+
+
+
 
 
     private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {

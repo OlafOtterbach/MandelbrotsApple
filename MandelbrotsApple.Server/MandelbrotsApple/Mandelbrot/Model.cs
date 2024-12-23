@@ -26,7 +26,7 @@ public readonly record struct MandelbrotSize(MandelbrotPosition Min, MandelbrotP
 
 public readonly record struct MandelbrotParameter(CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
-public readonly record struct MandelbrotZoomParameter(CanvasPosition MousePosition, int Delta, CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
+public readonly record struct MandelbrotZoomParameter(CanvasPosition MousePosition, bool ZoomIn, CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
 public readonly record struct MandelbrotMoveParameter(CanvasVector MouseVector, CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
