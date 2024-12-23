@@ -1,4 +1,5 @@
 import { MandelbrotParameter } from './../model/mandelbrot-parameter';
+import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
@@ -25,6 +26,14 @@ export class MandelbrotWebApiService {
     : Promise<MandelbrotResult> {
         const url = `http://localhost:5200/refresh`;
         const result = await lastValueFrom(this.httpClient.post<MandelbrotResult>(url, parameter));
+        return result;
+    }
+
+    public async zoomMandelbrotSet(
+        zoomParameter: MandelbrotZoomParameter)
+    : Promise<MandelbrotResult> {
+        const url = `http://localhost:5200/zoom`;
+        const result = await lastValueFrom(this.httpClient.post<MandelbrotResult>(url, zoomParameter));
         return result;
     }
 }

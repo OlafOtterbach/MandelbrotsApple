@@ -28,6 +28,7 @@ var app = builder.Build();
 
 app.UseCors();
 
+
 app.MapGet("/", () => "Hello Mandelbrot!");
 
 app.MapGet(
@@ -44,6 +45,11 @@ app.MapPost(
     "/zoom",
     ([FromBody] MandelbrotZoomParameter zoomParameter)
         => Results.Json(Zoom(zoomParameter), jsonOptions));
+
+app.MapPost(
+    "/move",
+    ([FromBody] MandelbrotMoveParameter moveParameter)
+        => Results.Json(Move(moveParameter), jsonOptions));
 
 
 app.Run("http://localhost:5200");

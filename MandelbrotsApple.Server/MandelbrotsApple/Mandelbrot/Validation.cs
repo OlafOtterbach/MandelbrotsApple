@@ -16,6 +16,16 @@ public static class Validation
         => new MandelbrotParameter(zoomParameter.CanvasSize, zoomParameter.CurrentMandelbrotSize, zoomParameter.MaxIterations);
 
 
+    public static Validation<MandelbrotMoveParameter> ValidateMandelbrotMoveParameter(this MandelbrotMoveParameter moveParameter)
+        => moveParameter.ToMandelbrotParameter().ValidateMandelbrotParameter().Map(param => moveParameter);
+
+    private static MandelbrotParameter ToMandelbrotParameter(this MandelbrotMoveParameter moveParameter)
+        => new MandelbrotParameter(moveParameter.CanvasSize, moveParameter.CurrentMandelbrotSize, moveParameter.MaxIterations);
+
+
+
+
+
 
 
     public static Validation<MandelbrotParameter> ValidateMandelbrotParameter(this MandelbrotParameter parameter) => Validate(parameter);

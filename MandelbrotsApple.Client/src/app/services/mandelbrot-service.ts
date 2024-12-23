@@ -6,6 +6,7 @@ import { MandelbrotPosition } from '../model/mandelbrot-position';
 import { MandelbrotSize } from '../model/mandelbrot-size';
 import { MandelbrotResult } from '../model/mandelbrot-result';
 import { MandelbrotParameter } from '../model/mandelbrot-parameter';
+import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
 
 @Injectable({
     providedIn: 'root',
@@ -30,6 +31,22 @@ export class MandelbrotService {
     : Promise<MandelbrotSize> {
         const parameter = new MandelbrotParameter(canvasSize, mandelbrotSize, 255);
         const result = await this.mandebrotWebApi.getRefreshedMandelbrotSet(parameter);
+        if(result.HasErrors)
+            return mandelbrotSize;
+
+        this.mapMandelbrotResult(result, imageData.data);
+        return result.MandelbrotSize;
+    }
+
+    public async zoomMandelbrotSet(
+        imageData: ImageData,
+        mousePosition: CanvasPosition,
+        delta: number,
+        canvasSize: CanvasSize,
+        mandelbrotSize: MandelbrotSize)
+    : Promise<MandelbrotSize> {
+        const zoomParameter = new MandelbrotZoomParameter(mousePosition, delta > 0, canvasSize, mandelbrotSize, 255);
+        const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
         if(result.HasErrors)
             return mandelbrotSize;
 
