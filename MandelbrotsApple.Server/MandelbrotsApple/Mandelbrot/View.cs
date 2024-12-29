@@ -5,9 +5,12 @@ using static Production;
 
 public static class View
 {
+    static readonly object _lock = new object();
+
     public static MandelbrotResult Initialize(CanvasSize canvasSize)
     {
-        var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(0.763, 0.0999), new MandelbrotPosition(0.768, 0.103));
+        //var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(0.763, 0.0999), new MandelbrotPosition(0.768, 0.103));
+        var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(-2.0, -2.0), new MandelbrotPosition(2.0, 2.0));
         var parameter = new MandelbrotParameter(canvasSize, mandelbrotSize, 255);
         var result = GenerateMandelbrotSet(parameter);
 
@@ -19,20 +22,26 @@ public static class View
 
     public static MandelbrotResult Zoom(MandelbrotZoomParameter zoomParameter)
     {
-        var result = zoomParameter
-                   .ValidateMandelbrotZoomParameter()
-                   .Map(Zooming)
-                   .GenerateMandelbrotSet();
-        return result;
+        lock (_lock)
+        {
+            var result = zoomParameter
+                       .ValidateMandelbrotZoomParameter()
+                       .Map(Zooming)
+                       .GenerateMandelbrotSet();
+            return result;
+        }
     }
 
     public static MandelbrotResult Move(MandelbrotMoveParameter moveParameter)
     {
-        var result = moveParameter
+        lock (_lock)
+        {
+            var result = moveParameter
                    .ValidateMandelbrotMoveParameter()
                    .Map(Moving)
                    .GenerateMandelbrotSet();
-        return result;
+            return result;
+        }
     }
 
 
@@ -80,6 +89,11 @@ public static class View
         var newYMin = mandelbrotSize.Min.Y + mandelbrotVector.Vy;
         var newXMax = mandelbrotSize.Max.X + mandelbrotVector.Vx;
         var newYMax = mandelbrotSize.Max.Y + mandelbrotVector.Vy;
+
+        Console.Write($"Vec({canvasVector.Vx}, {canvasVector.Vy}), ");
+        Console.Write($"Vec({mandelbrotVector.Vx}, {mandelbrotVector.Vy}), ");
+        Console.WriteLine($"Min({newXMin}, {newXMax})");
+
 
         var movedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));
 

@@ -52,6 +52,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
         if (event.buttons !== 0) {
             const position = this.canvasPosition(event.clientX, event.clientY);
             this.currentPosition = new CanvasPosition(position.X, position.Y);
+            //console.log("Pos("+this.currentPosition.X+","+this.currentPosition.Y+")");
             this.mouseDown = true;
             this.mouseMoved = false;
         }
@@ -65,14 +66,15 @@ export class MandelbrotViewComponent implements AfterViewInit {
     async onMouseMove(event: MouseEvent) {
         if (this.mouseDown == true) {
             this.mouseMoved = true;
-            const position = this.canvasPosition(event.clientX, event.clientY);
 
             this.updateCanvasData();
             const startPosition = this.currentPosition;
             const endPosition = this.canvasPosition(event.clientX, event.clientY);
             this.currentPosition = endPosition;
 
-            this.currentMandelbrotSize = await this._mandelbrotService.moveMandelbrotSet(this.imageData, startPosition, endPosition, this.canvasSize, this.currentMandelbrotSize);
+            //console.log("Pos("+endPosition.X+","+endPosition.Y+")");
+
+            this.currentMandelbrotSize = await this._mandelbrotService.moveMandelbrotSetAsync(this.imageData, startPosition, endPosition, this.canvasSize, this.currentMandelbrotSize);
             this.drawAsync();
 
             event.stopPropagation();

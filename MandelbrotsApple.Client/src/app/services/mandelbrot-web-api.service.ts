@@ -38,7 +38,7 @@ export class MandelbrotWebApiService {
         return result;
     }
 
-    public async moveMandelbrotSet(
+    public async moveMandelbrotSetAsync(
         moveParameter: MandelbrotMoveParameter)
     : Promise<MandelbrotResult> {
         const url = `http://localhost:5200/move`;

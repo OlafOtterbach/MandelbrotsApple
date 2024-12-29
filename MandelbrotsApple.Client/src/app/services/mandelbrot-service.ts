@@ -9,11 +9,15 @@ import { MandelbrotParameter } from '../model/mandelbrot-parameter';
 import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
 import { CanvasVector } from '../model/canvas-vector';
 import { MandelbrotMoveParameter } from '../model/mandelbrot-move-parameter';
+import { Semaphore } from './Semaphore';
 
 @Injectable({
     providedIn: 'root',
 })
 export class MandelbrotService {
+    private _semaphore: Semaphore = new Semaphore('semaphore', 1);
+
+
     constructor(private mandebrotWebApi: MandelbrotWebApiService) {}
 
     public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<MandelbrotSize> {
@@ -48,16 +52,26 @@ export class MandelbrotService {
         mandelbrotSize: MandelbrotSize)
     : Promise<MandelbrotSize> {
         const zoomIn = delta > 0;
+
+        const lock = await this._semaphore.acquire()
+
         const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, canvasSize, mandelbrotSize, 255);
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
-        if(result.HasErrors)
+
+        if(result.HasErrors) {
+            lock.release();
             return mandelbrotSize;
+        }
 
         this.mapMandelbrotResult(result, imageData.data);
+
+        lock.release();
         return result.MandelbrotSize;
     }
 
-    public async moveMandelbrotSet(
+    private count: number = 1;
+
+    public async moveMandelbrotSetAsync(
         imageData: ImageData,
         startPosition: CanvasPosition,
         endPosition: CanvasPosition,
@@ -68,12 +82,24 @@ export class MandelbrotService {
         const vy = endPosition.Y - startPosition.Y;
         const mouseVector = new CanvasVector(vx, vy);
 
-        const zoomParameter = new MandelbrotMoveParameter(mouseVector, canvasSize, mandelbrotSize, 255);
-        const result = await this.mandebrotWebApi.moveMandelbrotSet(zoomParameter);
-        if(result.HasErrors)
+        const id = this.count++;
+
+        console.log("In  " + id + " (" + vx + ", " + vy + ")");
+        const lock = await this._semaphore.acquire()
+
+        const moveParameter = new MandelbrotMoveParameter(mouseVector, canvasSize, mandelbrotSize, 255);
+        const result = await this.mandebrotWebApi.moveMandelbrotSetAsync(moveParameter);
+
+        if(result.HasErrors) {
+            lock.release();
             return mandelbrotSize;
+        }
 
         this.mapMandelbrotResult(result, imageData.data);
+
+        console.log("Out " + id + " (" + vx + ", " + vy + ")");
+        lock.release();
+
         return result.MandelbrotSize;
     }
 
