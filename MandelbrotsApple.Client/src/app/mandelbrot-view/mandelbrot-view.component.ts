@@ -20,17 +20,12 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
     private imageData!: ImageData;
     private canvasSize: CanvasSize = new CanvasSize(0, 0);
-    private currentMandelbrotSize: MandelbrotSize;
 
     private mouseDown: boolean = false;
     private mouseMoved: boolean = false;
     private currentPosition: CanvasPosition = new CanvasPosition(-1, -1);
 
     constructor(private _mandelbrotService: MandelbrotService) {
-        this.currentMandelbrotSize = new MandelbrotSize(
-            new MandelbrotPosition(0.763, 0.0999),
-            new MandelbrotPosition(0.768, 0.103)
-        );
     }
 
 
@@ -41,7 +36,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
             this.context = this.canvas.getContext('2d')!;
 
             this.updateCanvasData();
-            this.currentMandelbrotSize = await this._mandelbrotService.getInitialMandelbrotSet(this.imageData, this.canvasSize);
+            await this._mandelbrotService.getInitialMandelbrotSet(this.imageData, this.canvasSize);
             this.drawAsync();
         }
     }
@@ -74,7 +69,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
             //console.log("Pos("+endPosition.X+","+endPosition.Y+")");
 
-            this.currentMandelbrotSize = await this._mandelbrotService.moveMandelbrotSetAsync(this.imageData, startPosition, endPosition, this.canvasSize, this.currentMandelbrotSize);
+            await this._mandelbrotService.moveMandelbrotSetAsync(this.imageData, startPosition, endPosition, this.canvasSize);
             this.drawAsync();
 
             event.stopPropagation();
@@ -87,7 +82,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
         const delta = event.deltaY;
 
         this.updateCanvasData();
-        this.currentMandelbrotSize = await this._mandelbrotService.zoomMandelbrotSet(this.imageData, position, delta, this.canvasSize, this.currentMandelbrotSize);
+        await this._mandelbrotService.zoomMandelbrotSet(this.imageData, position, delta, this.canvasSize);
         this.drawAsync();
 
         event.stopPropagation();
@@ -108,7 +103,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
     public async onResize(_: Event) {
         this.updateCanvasData();
-        this.currentMandelbrotSize = await this._mandelbrotService.refreshedMandelbrotSet(this.imageData, this.canvasSize, this.currentMandelbrotSize);
+        await this._mandelbrotService.refreshedMandelbrotSet(this.imageData, this.canvasSize);
         this.drawAsync();
     }
 

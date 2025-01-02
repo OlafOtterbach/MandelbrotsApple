@@ -85,14 +85,14 @@ public static class View
 
         var mandelbrotVector = MandelbrotVector(canvasVector, canvasSize, mandelbrotSize);
 
-        var newXMin = mandelbrotSize.Min.X + mandelbrotVector.Vx;
-        var newYMin = mandelbrotSize.Min.Y + mandelbrotVector.Vy;
-        var newXMax = mandelbrotSize.Max.X + mandelbrotVector.Vx;
-        var newYMax = mandelbrotSize.Max.Y + mandelbrotVector.Vy;
+        var newXMin = mandelbrotSize.Min.X - mandelbrotVector.Vx;
+        var newYMin = mandelbrotSize.Min.Y - mandelbrotVector.Vy;
+        var newXMax = mandelbrotSize.Max.X - mandelbrotVector.Vx;
+        var newYMax = mandelbrotSize.Max.Y - mandelbrotVector.Vy;
 
-        Console.Write($"Vec({canvasVector.Vx}, {canvasVector.Vy}), ");
-        Console.Write($"Vec({mandelbrotVector.Vx}, {mandelbrotVector.Vy}), ");
-        Console.WriteLine($"Min({newXMin}, {newXMax})");
+        Console.WriteLine($"OldMin({mandelbrotSize.Min.X})");
+        Console.WriteLine($"NewMin({newXMin})");
+        Console.WriteLine();
 
 
         var movedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));

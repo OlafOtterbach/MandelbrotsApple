@@ -17,56 +17,58 @@ import { Semaphore } from './Semaphore';
 export class MandelbrotService {
     private _semaphore: Semaphore = new Semaphore('semaphore', 1);
 
+    private _currentMandelbrotSize: MandelbrotSize;
 
-    constructor(private mandebrotWebApi: MandelbrotWebApiService) {}
 
-    public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<MandelbrotSize> {
+    constructor(private mandebrotWebApi: MandelbrotWebApiService) {
+        this._currentMandelbrotSize = new MandelbrotSize(
+            new MandelbrotPosition(0.763, 0.0999),
+            new MandelbrotPosition(0.768, 0.103)
+        );
+    }
+
+    public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<void> {
         const result
             = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
         if(!result.HasErrors)
             this.mapMandelbrotResult(result, imageData.data);
 
-        return result.MandelbrotSize;
+        this._currentMandelbrotSize = result.MandelbrotSize;
     }
 
 
     public async refreshedMandelbrotSet(
         imageData: ImageData,
-        canvasSize: CanvasSize,
-        mandelbrotSize: MandelbrotSize)
-    : Promise<MandelbrotSize> {
-        const parameter = new MandelbrotParameter(canvasSize, mandelbrotSize, 255);
+        canvasSize: CanvasSize)
+    : Promise<void> {
+        const parameter = new MandelbrotParameter(canvasSize, this._currentMandelbrotSize, 255);
         const result = await this.mandebrotWebApi.getRefreshedMandelbrotSet(parameter);
         if(result.HasErrors)
-            return mandelbrotSize;
+            return;;
 
         this.mapMandelbrotResult(result, imageData.data);
-        return result.MandelbrotSize;
+        this._currentMandelbrotSize = result.MandelbrotSize;
     }
 
     public async zoomMandelbrotSet(
         imageData: ImageData,
         mousePosition: CanvasPosition,
         delta: number,
-        canvasSize: CanvasSize,
-        mandelbrotSize: MandelbrotSize)
-    : Promise<MandelbrotSize> {
+        canvasSize: CanvasSize)
+    : Promise<void> {
         const zoomIn = delta > 0;
 
         const lock = await this._semaphore.acquire()
 
-        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, canvasSize, mandelbrotSize, 255);
+        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, canvasSize, this._currentMandelbrotSize, 255);
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
 
-        if(result.HasErrors) {
-            lock.release();
-            return mandelbrotSize;
+        if(!result.HasErrors) {
+            this.mapMandelbrotResult(result, imageData.data);
+            this._currentMandelbrotSize = result.MandelbrotSize;
         }
 
-        this.mapMandelbrotResult(result, imageData.data);
-
         lock.release();
-        return result.MandelbrotSize;
     }
 
     private count: number = 1;
@@ -75,35 +77,26 @@ export class MandelbrotService {
         imageData: ImageData,
         startPosition: CanvasPosition,
         endPosition: CanvasPosition,
-        canvasSize: CanvasSize,
-        mandelbrotSize: MandelbrotSize)
-    : Promise<MandelbrotSize> {
+        canvasSize: CanvasSize)
+    : Promise<void> {
         const vx = endPosition.X - startPosition.X;
         const vy = endPosition.Y - startPosition.Y;
         const mouseVector = new CanvasVector(vx, vy);
 
         const id = this.count++;
 
-        console.log("In  " + id + " (" + vx + ", " + vy + ")");
         const lock = await this._semaphore.acquire()
 
-        const moveParameter = new MandelbrotMoveParameter(mouseVector, canvasSize, mandelbrotSize, 255);
+        const moveParameter = new MandelbrotMoveParameter(mouseVector, canvasSize, this._currentMandelbrotSize, 255);
         const result = await this.mandebrotWebApi.moveMandelbrotSetAsync(moveParameter);
 
-        if(result.HasErrors) {
-            lock.release();
-            return mandelbrotSize;
+        if(!result.HasErrors) {
+            this.mapMandelbrotResult(result, imageData.data);
+            this._currentMandelbrotSize = result.MandelbrotSize;
         }
 
-        this.mapMandelbrotResult(result, imageData.data);
-
-        console.log("Out " + id + " (" + vx + ", " + vy + ")");
         lock.release();
-
-        return result.MandelbrotSize;
     }
-
-
 
 
 
