@@ -5,8 +5,6 @@ using static Production;
 
 public static class View
 {
-    static readonly object _lock = new object();
-
     public static MandelbrotResult Initialize(CanvasSize canvasSize)
     {
         //var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(0.763, 0.0999), new MandelbrotPosition(0.768, 0.103));
@@ -22,31 +20,21 @@ public static class View
 
     public static MandelbrotResult Zoom(MandelbrotZoomParameter zoomParameter)
     {
-        lock (_lock)
-        {
-            var result = zoomParameter
-                       .ValidateMandelbrotZoomParameter()
-                       .Map(Zooming)
-                       .GenerateMandelbrotSet();
-            return result;
-        }
+        var result = zoomParameter
+                    .ValidateMandelbrotZoomParameter()
+                    .Map(Zooming)
+                    .GenerateMandelbrotSet();
+        return result;
     }
 
     public static MandelbrotResult Move(MandelbrotMoveParameter moveParameter)
     {
-        lock (_lock)
-        {
-            var result = moveParameter
-                   .ValidateMandelbrotMoveParameter()
-                   .Map(Moving)
-                   .GenerateMandelbrotSet();
-            return result;
-        }
+        var result = moveParameter
+                .ValidateMandelbrotMoveParameter()
+                .Map(Moving)
+                .GenerateMandelbrotSet();
+        return result;
     }
-
-
-
-
 
 
 
@@ -72,12 +60,12 @@ public static class View
 
         var zoomedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));
 
-        var zoomedMandelbrotParameter = new MandelbrotParameter(canvasSize, zoomedMandelbrotSize, zoomParameter.MaxIterations); 
+        var zoomedMandelbrotParameter = new MandelbrotParameter(canvasSize, zoomedMandelbrotSize, zoomParameter.MaxIterations);
 
         return zoomedMandelbrotParameter;
     }
 
-    public static MandelbrotParameter Moving(this MandelbrotMoveParameter  moveParameter)
+    public static MandelbrotParameter Moving(this MandelbrotMoveParameter moveParameter)
     {
         var canvasVector = moveParameter.MouseVector;
         var canvasSize = moveParameter.CanvasSize;
