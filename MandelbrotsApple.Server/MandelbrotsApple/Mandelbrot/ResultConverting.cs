@@ -38,6 +38,6 @@ public static class ResultConverting
         12 => 'C',
         13 => 'D',
         14 => 'E',
-        _ => 'F'
+        _  => 'F'
     };
 }

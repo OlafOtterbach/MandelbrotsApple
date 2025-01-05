@@ -31,7 +31,7 @@ export class MandelbrotService {
         const result
             = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
         if(!result.HasErrors)
-            this.mapMandelbrotResult(result, imageData.data);
+            this.mapMandelbrotResult2(result, imageData.data);
 
         this._currentMandelbrotSize = result.MandelbrotSize;
     }
@@ -46,7 +46,7 @@ export class MandelbrotService {
         if(result.HasErrors)
             return;;
 
-        this.mapMandelbrotResult(result, imageData.data);
+        this.mapMandelbrotResult2(result, imageData.data);
         this._currentMandelbrotSize = result.MandelbrotSize;
     }
 
@@ -64,7 +64,7 @@ export class MandelbrotService {
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
 
         if(!result.HasErrors) {
-            this.mapMandelbrotResult(result, imageData.data);
+            this.mapMandelbrotResult2(result, imageData.data);
             this._currentMandelbrotSize = result.MandelbrotSize;
         }
 
@@ -91,39 +91,57 @@ export class MandelbrotService {
         const result = await this.mandebrotWebApi.moveMandelbrotSetAsync(moveParameter);
 
         if(!result.HasErrors) {
-            this.mapMandelbrotResult(result, imageData.data);
+            this.mapMandelbrotResult2(result, imageData.data);
             this._currentMandelbrotSize = result.MandelbrotSize;
         }
 
         lock.release();
     }
 
-
-
-
-    private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
+    private mapMandelbrotResult2(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
         let index = 0;
         const codedData = mandelbrotResult.ImageData;
-        for (let i = 0; i < codedData.length; i += 6) {
-            const hightRed = codedData[i];
-            const lowRed = codedData[i + 1];
-            const red = this.convertToByte(hightRed, lowRed);
-            const hightGreen = codedData[i + 2];
-            const lowGreen = codedData[i + 3];
-            const green = this.convertToByte(hightGreen, lowGreen);
-            const hightBlue = codedData[i + 4];
-            const lowBlue = codedData[i + 5];
-            const blue = this.convertToByte(hightBlue, lowBlue);
-            [map[index], map[index + 1], map[index + 2], map[index + 3]] = [
-                red,
-                green,
-                blue,
-                255,
-            ];
+        for (let i = 0; i < codedData.length; i += 2) {
+            const high = codedData[i];
+            const low = codedData[i + 1];
+            const color = this.color(this.convertToByte(high, low), 255);
+
+            [map[index], map[index + 1], map[index + 2], map[index + 3]] = color;
             index += 4;
         }
     }
 
+    private color(iteration: number, maxIteration: number): [number, number, number, number] {
+        if (iteration >= maxIteration) {
+                return [0, 0, 0, 255];
+        }
+        else
+        {
+            switch (iteration % 16 + 1)
+            {
+                case 1:  return [0, 0, 200, 255];
+                case 2:  return [0, 0, 218, 255];
+                case 3:  return [0, 0, 236, 255];
+                case 4:  return [0, 0, 255, 255];
+
+                case 5:  return [0, 255, 0, 255];
+                case 6:  return [0, 236, 0, 255];
+                case 7:  return [0, 218, 0, 255];
+                case 8:  return [0, 200, 0, 255];
+
+                case 9:  return [0, 0, 0, 255];
+                case 10: return [218, 0, 0, 255];
+                case 11: return [236, 0, 0, 255];
+                case 12: return [255, 0, 0, 255];
+
+                case 13: return [255, 255, 0, 255];
+                case 14: return [236, 236, 0, 255];
+                case 15: return [218, 218, 0, 255];
+                case 16: return [200, 200, 0, 255];
+                default: return [0, 0, 0, 255];
+            }
+        }
+    }
 
     private convertToByte(hight: string, low: string): number {
         const value =

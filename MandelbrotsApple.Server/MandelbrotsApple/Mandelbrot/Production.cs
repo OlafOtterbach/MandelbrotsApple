@@ -1,7 +1,7 @@
 ﻿namespace MandelbrotsApple.Mandelbrot;
 
 using LaYumba.Functional;
-using static Generating;
+using static Generating2;
 using static Validation;
 using static ResultConverting;
 
