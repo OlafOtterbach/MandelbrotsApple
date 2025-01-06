@@ -31,7 +31,7 @@ export class MandelbrotService {
         const result
             = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
         if(!result.HasErrors)
-            this.mapMandelbrotResult2(result, imageData.data);
+            this.mapMandelbrotResult(result, imageData.data);
 
         this._currentMandelbrotSize = result.MandelbrotSize;
     }
@@ -46,7 +46,7 @@ export class MandelbrotService {
         if(result.HasErrors)
             return;;
 
-        this.mapMandelbrotResult2(result, imageData.data);
+        this.mapMandelbrotResult(result, imageData.data);
         this._currentMandelbrotSize = result.MandelbrotSize;
     }
 
@@ -64,7 +64,7 @@ export class MandelbrotService {
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
 
         if(!result.HasErrors) {
-            this.mapMandelbrotResult2(result, imageData.data);
+            this.mapMandelbrotResult(result, imageData.data);
             this._currentMandelbrotSize = result.MandelbrotSize;
         }
 
@@ -91,14 +91,14 @@ export class MandelbrotService {
         const result = await this.mandebrotWebApi.moveMandelbrotSetAsync(moveParameter);
 
         if(!result.HasErrors) {
-            this.mapMandelbrotResult2(result, imageData.data);
+            this.mapMandelbrotResult(result, imageData.data);
             this._currentMandelbrotSize = result.MandelbrotSize;
         }
 
         lock.release();
     }
 
-    private mapMandelbrotResult2(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
+    private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
         let index = 0;
         const codedData = mandelbrotResult.ImageData;
         for (let i = 0; i < codedData.length; i += 2) {
@@ -199,18 +199,5 @@ export class MandelbrotService {
         const mandelbrotY = mandelbrotMin.Y + canvasPosition.Y * (mandelbrotMax.Y - mandelbrotMin.Y) / (canvasSize.Height - 1);
 
         return new MandelbrotPosition(mandelbrotX, mandelbrotY);
-    }
-
-    public CanvasPosition(
-        mandelbrotPosition: MandelbrotPosition,
-        canvasSize: CanvasSize,
-        mandelbrotSize: MandelbrotSize
-    ): CanvasPosition {
-        const mandelbrotMin = mandelbrotSize.Min;
-        const mandelbrotMax = mandelbrotSize.Max;
-        const canvasX = (mandelbrotPosition.X - mandelbrotMin.X) * (canvasSize.Width - 1) / (mandelbrotMax.X - mandelbrotMin.X);
-        const canvasY = (mandelbrotPosition.Y - mandelbrotMin.Y) * (canvasSize.Height - 1) / (mandelbrotMax.Y - mandelbrotMin.Y);
-
-        return new CanvasPosition(canvasX, canvasY);
     }
 }

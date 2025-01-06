@@ -8,7 +8,7 @@ public static class View
     public static MandelbrotResult Initialize(CanvasSize canvasSize)
     {
         //var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(0.763, 0.0999), new MandelbrotPosition(0.768, 0.103));
-        var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(-2.0, -2.0), new MandelbrotPosition(2.0, 2.0));
+        var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(-1.5, -2.0), new MandelbrotPosition(2.5, 2.0));
         var parameter = new MandelbrotParameter(canvasSize, mandelbrotSize, 255);
         var result = GenerateMandelbrotSet(parameter);
 
