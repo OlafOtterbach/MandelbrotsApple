@@ -2,122 +2,84 @@
  * From repository: https://gist.github.com/cahilfoley/4b1b2f3fa9e2f9652ee1d8501443b5ca
  */
 
-//import { cpus } from 'os'
-
 /**
  * A lock that is granted when calling [[Semaphore.acquire]].
  */
 type Lock = {
-  release: () => void
-}
+    release: () => void;
+};
 
 /**
  * A task that has been scheduled with a [[Semaphore]] but not yet started.
  */
 type WaitingPromise = {
-  resolve: (lock: Lock) => void
-  reject: (err?: Error) => void
-}
+    resolve: (lock: Lock) => void;
+    reject: (err?: Error) => void;
+};
 
 /**
  * A [[Semaphore]] is a tool that is used to control concurrent access to a common resource. This implementation
  * is used to apply a max-parallelism threshold.
  */
 export class Semaphore {
-  private running = 0
-  private waiting: WaitingPromise[] = []
+    private running = 0;
+    private waiting: WaitingPromise[] = [];
+    private max = 1;
 
-  constructor(private label: string, public max: number = 1024) { //cpus().length) {
-    if (max < 1) {
-      throw new Error(
-        `The ${label} semaphore was created with a max value of ${max} but the max value cannot be less than 1`,
-      )
-    }
-  }
+    constructor(private label: string) {}
 
-  /**
-   * Allows the next task to start, if there are any waiting.
-   */
-  private take = () => {
-    if (this.waiting.length > 0 && this.running < this.max) {
-      this.running++
+    /**
+     * Acquire a lock on the target resource.
+     *
+     * ! Returns a function to release the lock, it is critical that this function is called when the task is finished with the resource.
+     */
+    acquire = (): Promise<Lock> => {
+        if (this.running < this.max) {
+            this.running++;
+            return Promise.resolve({ release: this.release });
+        }
 
-      // Get the next task from the queue
-      const task = this.waiting.shift()
+        return new Promise<Lock>((resolve, reject) => {
+            this.waiting.push({ resolve, reject });
+        });
+    };
 
-      // Resolve the promise to allow it to start, provide a release function
-      if(task !== undefined)
-          task.resolve({ release: this.release })
-    }
-  }
+    /**
+     * Purge all waiting tasks from the [[Semaphore]]
+     */
+    purge = () => {
+        this.waiting.forEach((task) => {
+            task.reject(
+                new Error(
+                    'The semaphore was purged and as a result this task has been cancelled'
+                )
+            );
+        });
 
-  /**
-   * Acquire a lock on the target resource.
-   *
-   * ! Returns a function to release the lock, it is critical that this function is called when the task is finished with the resource.
-   */
-  acquire = (): Promise<Lock> => {
-    if (this.running < this.max) {
-      this.running++
-      return Promise.resolve({ release: this.release })
-    }
+        this.running = 0;
+        this.waiting = [];
+    };
 
-    return new Promise<Lock>((resolve, reject) => {
-      this.waiting.push({ resolve, reject })
-    })
-  }
+    /**
+     * Allows the next task to start, if there are any waiting.
+     */
+    private take = () => {
+        if (this.waiting.length > 0 && this.running < this.max) {
+            this.running++;
 
-  /**
-   * Releases a lock held by a task. This function is returned from the acquire function.
-   */
-  private release = () => {
-    this.running--
-    this.take()
-  }
+            // Get the next task from the queue
+            const task = this.waiting.shift();
 
-  /**
-   * Purge all waiting tasks from the [[Semaphore]]
-   */
-  purge = () => {
-    this.waiting.forEach(task => {
-      task.reject(
-        new Error('The semaphore was purged and as a result this task has been cancelled'),
-      )
-    })
+            // Resolve the promise to allow it to start, provide a release function
+            if (task !== undefined) task.resolve({ release: this.release });
+        }
+    };
 
-    this.running = 0
-    this.waiting = []
-  }
+    /**
+     * Releases a lock held by a task. This function is returned from the acquire function.
+     */
+    private release = () => {
+        this.running--;
+        this.take();
+    };
 }
-
-
-
-/***********************
- * Example usage below *
- ***********************/
-/*
-// Just a promise that resolves in `ms` milliseconds
-const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
-// Allows up to 6 parallel operations to run
-const exampleResource = new Semaphore('example', 6)
-
-async function runOperation() {
-  // Wait until lock is acquired to do anything
-  const lock = await exampleResource.acquire()
-
-  // Simulated operation that takes 1 second to finish
-  await pause(1000)
-
-  // Done with the resource now, release the lock to let others use it
-  lock.release()
-}
-
-const start = Date.now()
-
-for (let i = 0; i < 50; i++) {
-  runOperation().then(() => {
-    console.log(`Operation ${i} finished in ${Math.floor((Date.now() - start) / 1000)} secs`)
-  })
-}
-*/

@@ -15,7 +15,7 @@ import { Semaphore } from './Semaphore';
     providedIn: 'root',
 })
 export class MandelbrotService {
-    private _semaphore: Semaphore = new Semaphore('semaphore', 1);
+    private _semaphore: Semaphore = new Semaphore('semaphore');
 
     private _currentMandelbrotSize: MandelbrotSize;
 
