@@ -1,4 +1,4 @@
-export class CanvasVector {
+export class ImageVector {
     constructor(public Vx: number, public Vy: number) {
     }
 };

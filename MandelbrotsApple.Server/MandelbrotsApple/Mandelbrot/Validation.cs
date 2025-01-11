@@ -13,17 +13,14 @@ public static class Validation
       => zoomParameter.ToMandelbrotParameter().ValidateMandelbrotParameter().Map(param => zoomParameter);
 
     private static MandelbrotParameter ToMandelbrotParameter(this MandelbrotZoomParameter zoomParameter)
-        => new MandelbrotParameter(zoomParameter.CanvasSize, zoomParameter.CurrentMandelbrotSize, zoomParameter.MaxIterations);
+        => new MandelbrotParameter(zoomParameter.ImageSize, zoomParameter.CurrentMandelbrotSize, zoomParameter.MaxIterations);
 
 
     public static Validation<MandelbrotMoveParameter> ValidateMandelbrotMoveParameter(this MandelbrotMoveParameter moveParameter)
         => moveParameter.ToMandelbrotParameter().ValidateMandelbrotParameter().Map(param => moveParameter);
 
     private static MandelbrotParameter ToMandelbrotParameter(this MandelbrotMoveParameter moveParameter)
-        => new MandelbrotParameter(moveParameter.CanvasSize, moveParameter.CurrentMandelbrotSize, moveParameter.MaxIterations);
-
-
-
+        => new MandelbrotParameter(moveParameter.ImageSize, moveParameter.CurrentMandelbrotSize, moveParameter.MaxIterations);
 
 
 
@@ -62,28 +59,28 @@ public static class Validation
 
     public static Validation<MandelbrotParameter>
     Validate_Width_Minimum(MandelbrotParameter parameter)
-        => parameter.CanvasSize.Width > 0
+        => parameter.ImageSize.Width > 0
             ? parameter
             : WidthIsLessThanOnePixelError;
 
 
     public static Validation<MandelbrotParameter>
     Validate_Width_Maximum(MandelbrotParameter parameter)
-        => parameter.CanvasSize.Width <= 10000
+        => parameter.ImageSize.Width <= 10000
             ? parameter
             : WidthIsGreaterThan10000PixelError;
 
 
     public static Validation<MandelbrotParameter>
     Validate_Height_Minimum(MandelbrotParameter parameter)
-        => parameter.CanvasSize.Height > 0
+        => parameter.ImageSize.Height > 0
             ? parameter
             : HeightIsLessThanOnePixelError;
 
 
     public static Validation<MandelbrotParameter>
     Validate_Height_Maximum(MandelbrotParameter parameter)
-        => parameter.CanvasSize.Width <= 10000
+        => parameter.ImageSize.Width <= 10000
             ? parameter
             : HeightIsGreaterThan10000PixelError;
 

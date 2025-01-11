@@ -2,14 +2,11 @@
 
 using LaYumba.Functional;
 
+public readonly record struct Imageosition(double X, double Y);
 
+public readonly record struct ImageVector(double Vx, double Vy);
 
-
-public readonly record struct CanvasPosition(double X, double Y);
-
-public readonly record struct CanvasVector(double Vx, double Vy);
-
-public readonly record struct CanvasSize(int Width, int Height);
+public readonly record struct ImageSize(int Width, int Height);
 
 public readonly record struct MandelbrotPosition(double X, double Y);
 
@@ -24,13 +21,13 @@ public readonly record struct MandelbrotSize(MandelbrotPosition Min, MandelbrotP
 
 
 
-public readonly record struct MandelbrotParameter(CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
+public readonly record struct MandelbrotParameter(ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
-public readonly record struct MandelbrotZoomParameter(CanvasPosition MousePosition, bool ZoomIn, CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
+public readonly record struct MandelbrotZoomParameter(Imageosition MousePosition, bool ZoomIn, ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
-public readonly record struct MandelbrotMoveParameter(CanvasVector MouseVector, CanvasSize CanvasSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
+public readonly record struct MandelbrotMoveParameter(ImageVector MouseVector, ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
-public readonly record struct MandelbrotResult(string ImageData, MandelbrotSize MandelbrotSize, ErrorType[] Errors, bool HasErrors);
+public readonly record struct MandelbrotResult(string ImageData, int BytesPerPixel, MandelbrotSize MandelbrotSize, ErrorType[] Errors, bool HasErrors);
 
 
 public enum ErrorType

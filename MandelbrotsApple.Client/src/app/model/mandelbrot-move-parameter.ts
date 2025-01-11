@@ -1,11 +1,11 @@
-import { CanvasSize } from "./canvas-size";
+import { ImageSize } from "./image-size";
 import { MandelbrotSize } from "./mandelbrot-size";
-import { CanvasVector } from "./canvas-vector";
+import { ImageVector } from "./image-vector";
 
 export class MandelbrotMoveParameter {
   constructor(
-    public MouseVector: CanvasVector,
-    public CanvasSize: CanvasSize,
+    public MouseVector: ImageVector,
+    public ImageSize: ImageSize,
     public CurrentMandelbrotSize: MandelbrotSize,
     public MaxIterations: number) {
   }

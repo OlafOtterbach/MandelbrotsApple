@@ -34,7 +34,7 @@ app.MapGet("/", () => "Hello Mandelbrot!");
 app.MapGet(
     "/{width}/{height}/initialize",
     ([FromRoute] int width, [FromRoute] int height) 
-        => Results.Json(Initialize(new CanvasSize(width, height)), jsonOptions));
+        => Results.Json(Initialize(new ImageSize(width, height)), jsonOptions));
 
 app.MapPost(
     "/refresh",

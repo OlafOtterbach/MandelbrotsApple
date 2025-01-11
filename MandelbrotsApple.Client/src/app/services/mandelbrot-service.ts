@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { MandelbrotWebApiService } from './mandelbrot-web-api.service';
-import { CanvasSize } from '../model/canvas-size';
-import { CanvasPosition } from '../model/canvas-position';
+import { ImageSize } from '../model/image-size';
+import { ImagePosition } from '../model/image-position';
 import { MandelbrotPosition } from '../model/mandelbrot-position';
 import { MandelbrotSize } from '../model/mandelbrot-size';
 import { MandelbrotResult } from '../model/mandelbrot-result';
 import { MandelbrotParameter } from '../model/mandelbrot-parameter';
 import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
-import { CanvasVector } from '../model/canvas-vector';
+import { ImageVector } from '../model/image-vector';
 import { MandelbrotMoveParameter } from '../model/mandelbrot-move-parameter';
 import { Semaphore } from './Semaphore';
 
@@ -27,7 +27,7 @@ export class MandelbrotService {
         );
     }
 
-    public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: CanvasSize) : Promise<void> {
+    public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: ImageSize) : Promise<void> {
         const result
             = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
         if(!result.HasErrors)
@@ -39,7 +39,7 @@ export class MandelbrotService {
 
     public async refreshedMandelbrotSet(
         imageData: ImageData,
-        canvasSize: CanvasSize)
+        canvasSize: ImageSize)
     : Promise<void> {
         const parameter = new MandelbrotParameter(canvasSize, this._currentMandelbrotSize, 255);
         const result = await this.mandebrotWebApi.getRefreshedMandelbrotSet(parameter);
@@ -52,9 +52,9 @@ export class MandelbrotService {
 
     public async zoomMandelbrotSet(
         imageData: ImageData,
-        mousePosition: CanvasPosition,
+        mousePosition: ImagePosition,
         delta: number,
-        canvasSize: CanvasSize)
+        canvasSize: ImageSize)
     : Promise<void> {
         const zoomIn = delta > 0;
 
@@ -75,13 +75,13 @@ export class MandelbrotService {
 
     public async moveMandelbrotSetAsync(
         imageData: ImageData,
-        startPosition: CanvasPosition,
-        endPosition: CanvasPosition,
-        canvasSize: CanvasSize)
+        startPosition: ImagePosition,
+        endPosition: ImagePosition,
+        canvasSize: ImageSize)
     : Promise<void> {
         const vx = endPosition.X - startPosition.X;
         const vy = endPosition.Y - startPosition.Y;
-        const mouseVector = new CanvasVector(vx, vy);
+        const mouseVector = new ImageVector(vx, vy);
 
         const id = this.count++;
 
@@ -189,14 +189,14 @@ export class MandelbrotService {
     }
 
     public MandelbrotPosition(
-        canvasPosition: CanvasPosition,
-        canvasSize: CanvasSize,
+        imagePosition: ImagePosition,
+        canvasSize: ImageSize,
         mandelbrotSize: MandelbrotSize
     ): MandelbrotPosition {
         const mandelbrotMin = mandelbrotSize.Min;
         const mandelbrotMax = mandelbrotSize.Max;
-        const mandelbrotX = mandelbrotMin.X + canvasPosition.X * (mandelbrotMax.X - mandelbrotMin.X) / (canvasSize.Width - 1);
-        const mandelbrotY = mandelbrotMin.Y + canvasPosition.Y * (mandelbrotMax.Y - mandelbrotMin.Y) / (canvasSize.Height - 1);
+        const mandelbrotX = mandelbrotMin.X + imagePosition.X * (mandelbrotMax.X - mandelbrotMin.X) / (canvasSize.Width - 1);
+        const mandelbrotY = mandelbrotMin.Y + imagePosition.Y * (mandelbrotMax.Y - mandelbrotMin.Y) / (canvasSize.Height - 1);
 
         return new MandelbrotPosition(mandelbrotX, mandelbrotY);
     }

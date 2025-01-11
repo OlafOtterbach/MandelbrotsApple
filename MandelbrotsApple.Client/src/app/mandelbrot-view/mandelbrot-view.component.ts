@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MandelbrotService } from '../services/mandelbrot-service';
 import { MandelbrotSize } from '../model/mandelbrot-size';
-import { CanvasPosition } from '../model/canvas-position';
-import { CanvasSize } from '../model/canvas-size';
+import { ImagePosition } from '../model/image-position';
+import { ImageSize } from '../model/image-size';
 import { MandelbrotPosition } from '../model/mandelbrot-position';
 
 @Component({
@@ -19,11 +19,11 @@ export class MandelbrotViewComponent implements AfterViewInit {
     private context!: CanvasRenderingContext2D;
 
     private imageData!: ImageData;
-    private canvasSize: CanvasSize = new CanvasSize(0, 0);
+    private imageSize: ImageSize = new ImageSize(0, 0);
 
     private mouseDown: boolean = false;
     private mouseMoved: boolean = false;
-    private currentPosition: CanvasPosition = new CanvasPosition(-1, -1);
+    private currentPosition: ImagePosition = new ImagePosition(-1, -1);
 
     constructor(private _mandelbrotService: MandelbrotService) {
     }
@@ -36,7 +36,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
             this.context = this.canvas.getContext('2d')!;
 
             this.updateCanvasData();
-            await this._mandelbrotService.getInitialMandelbrotSet(this.imageData, this.canvasSize);
+            await this._mandelbrotService.getInitialMandelbrotSet(this.imageData, this.imageSize);
             this.drawAsync();
         }
     }
@@ -45,8 +45,8 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
     async onMouseDown(event: MouseEvent) {
         if (event.buttons !== 0) {
-            const position = this.canvasPosition(event.clientX, event.clientY);
-            this.currentPosition = new CanvasPosition(position.X, position.Y);
+            const position = this.imagePosition(event.clientX, event.clientY);
+            this.currentPosition = new ImagePosition(position.X, position.Y);
             //console.log("Pos("+this.currentPosition.X+","+this.currentPosition.Y+")");
             this.mouseDown = true;
             this.mouseMoved = false;
@@ -64,12 +64,12 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
             this.updateCanvasData();
             const startPosition = this.currentPosition;
-            const endPosition = this.canvasPosition(event.clientX, event.clientY);
+            const endPosition = this.imagePosition(event.clientX, event.clientY);
             this.currentPosition = endPosition;
 
             //console.log("Pos("+endPosition.X+","+endPosition.Y+")");
 
-            await this._mandelbrotService.moveMandelbrotSetAsync(this.imageData, startPosition, endPosition, this.canvasSize);
+            await this._mandelbrotService.moveMandelbrotSetAsync(this.imageData, startPosition, endPosition, this.imageSize);
             this.drawAsync();
 
             event.stopPropagation();
@@ -78,11 +78,11 @@ export class MandelbrotViewComponent implements AfterViewInit {
     }
 
     async onWheel(event: WheelEvent) {
-        const position = this.canvasPosition(event.clientX, event.clientY);
+        const position = this.imagePosition(event.clientX, event.clientY);
         const delta = event.deltaY;
 
         this.updateCanvasData();
-        await this._mandelbrotService.zoomMandelbrotSet(this.imageData, position, delta, this.canvasSize);
+        await this._mandelbrotService.zoomMandelbrotSet(this.imageData, position, delta, this.imageSize);
         this.drawAsync();
 
         event.stopPropagation();
@@ -96,14 +96,14 @@ export class MandelbrotViewComponent implements AfterViewInit {
             0,
             0,
             0,
-            this.canvasSize.Width,
-            this.canvasSize.Height
+            this.imageSize.Width,
+            this.imageSize.Height
         );
     }
 
     public async onResize(_: Event) {
         this.updateCanvasData();
-        await this._mandelbrotService.refreshedMandelbrotSet(this.imageData, this.canvasSize);
+        await this._mandelbrotService.refreshedMandelbrotSet(this.imageData, this.imageSize);
         this.drawAsync();
     }
 
@@ -111,14 +111,14 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
 
 
-    private canvasPosition(
+    private imagePosition(
         screenPositionX: number,
         screenpositionY: number
-    ): CanvasPosition {
-        if (this.canvas === undefined) return new CanvasPosition(-1, -1);
+    ): ImagePosition {
+        if (this.canvas === undefined) return new ImagePosition(-1, -1);
 
         const rect = this.canvas.getBoundingClientRect();
-        const pos = new CanvasPosition(
+        const pos = new ImagePosition(
             screenPositionX - rect.left,
             screenpositionY - rect.top
         );
@@ -127,24 +127,24 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
     private updateCanvasData() {
         const newCanvasSize = this.getCanvasSize(this.context);
-        if(newCanvasSize.Width != this.canvasSize.Width && newCanvasSize.Height != this.canvasSize.Height) {
-            this.canvasSize = newCanvasSize;
-            this.imageData = this.getImageData(this.canvasSize);
+        if(newCanvasSize.Width != this.imageSize.Width && newCanvasSize.Height != this.imageSize.Height) {
+            this.imageSize = newCanvasSize;
+            this.imageData = this.getImageData(this.imageSize);
         }
     }
 
-    private getCanvasSize(context: CanvasRenderingContext2D): CanvasSize {
+    private getCanvasSize(context: CanvasRenderingContext2D): ImageSize {
         const width = context.canvas.width;
         const height = context.canvas.height;
-        return new CanvasSize(width, height);
+        return new ImageSize(width, height);
     }
 
-    private getImageData(canvasSize: CanvasSize): ImageData {
+    private getImageData(imageSize: ImageSize): ImageData {
         return this.context.getImageData(
             0,
             0,
-            canvasSize.Width,
-            canvasSize.Height
+            imageSize.Width,
+            imageSize.Height
         );
     }
 }

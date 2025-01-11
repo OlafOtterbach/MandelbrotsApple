@@ -8,7 +8,7 @@ public class ValidationTest
     public void Validate_Difference_Between_XMin_XMax_Test__Difference_exist()
     {
         // Arrange
-        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, -2.0), new MandelbrotPosition(-2.0, 2.0)), 255);
+        var parameter = new MandelbrotParameter(new ImageSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, -2.0), new MandelbrotPosition(-2.0, 2.0)), 255);
 
         // Act
         var result = Validation.Validate_Difference_Between_XMin_XMax(parameter);
@@ -21,7 +21,7 @@ public class ValidationTest
     public void Validate_Difference_Between_XMin_XMax_Test__Difference_exist_not()
     {
         // Arrange
-        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, -2.0), new MandelbrotPosition(2.000000001, 2.0)), 255);
+        var parameter = new MandelbrotParameter(new ImageSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, -2.0), new MandelbrotPosition(2.000000001, 2.0)), 255);
 
         // Act
         var result = Validation.Validate_Difference_Between_XMin_XMax(parameter);
@@ -34,7 +34,7 @@ public class ValidationTest
     public void Validate_Difference_Between_YMin_YMax_Test__Difference_exist()
     {
         // Arrange
-        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, 2.0), new MandelbrotPosition(-2.0, -2.0)), 255);
+        var parameter = new MandelbrotParameter(new ImageSize(320, 200), new MandelbrotSize(new MandelbrotPosition(2.0, 2.0), new MandelbrotPosition(-2.0, -2.0)), 255);
 
         // Act
         var result = Validation.Validate_Difference_Between_YMin_YMax(parameter);
@@ -47,7 +47,7 @@ public class ValidationTest
     public void Validate_Difference_Between_YMin_YMax_Test__Difference_exist_not()
     {
         // Arrange
-        var parameter = new MandelbrotParameter(new CanvasSize(320, 200), new MandelbrotSize(new MandelbrotPosition(-2.0, 2.0), new MandelbrotPosition(2.0, 2.0000000001)), 255);
+        var parameter = new MandelbrotParameter(new ImageSize(320, 200), new MandelbrotSize(new MandelbrotPosition(-2.0, 2.0), new MandelbrotPosition(2.0, 2.0000000001)), 255);
 
         // Act
         var result = Validation.Validate_Difference_Between_YMin_YMax(parameter);

@@ -6,61 +6,70 @@ using static Common;
 public class Generating
 {
     public static byte[] MandelbrotImage(MandelbrotParameter parameter)
+        => MandelbrotImage(parameter, BytesPerNumber(parameter.MaxIterations));
+
+
+
+
+    private static byte[] MandelbrotImage(MandelbrotParameter parameter, int bytesPerPixel)
+        => MandelbrotImage(parameter, CreateImage(parameter.ImageSize, bytesPerPixel), BytesPerNumber(parameter.MaxIterations));
+
+    private static byte[] MandelbrotImage(MandelbrotParameter parameter, byte[] image, int bytesPerPixel)
     {
-        var canvas = CreateCanvas(parameter.CanvasSize, parameter.MaxIterations);
         MandelbrotSet(
-            canvas,
-            parameter.CanvasSize.Width,
-            parameter.CanvasSize.Height,
+            image,
+            parameter.ImageSize.Width,
+            parameter.ImageSize.Height,
             parameter.CurrentMandelbrotSize.Min.X,
             parameter.CurrentMandelbrotSize.Max.X,
             parameter.CurrentMandelbrotSize.Min.Y,
             parameter.CurrentMandelbrotSize.Max.Y,
             parameter.MaxIterations,
-            XCoordinates(parameter.CanvasSize.Width, parameter.CurrentMandelbrotSize.Min.X, parameter.CurrentMandelbrotSize.Max.X));
-        return canvas;
+            bytesPerPixel,
+            XCoordinates(parameter.ImageSize.Width, parameter.CurrentMandelbrotSize.Min.X, parameter.CurrentMandelbrotSize.Max.X, bytesPerPixel));
+        return image;
     }
 
-    private static byte[] CreateCanvas(CanvasSize canvasSize, int maxIteration) => new byte[canvasSize.Width * canvasSize.Height * BytesPerNumber(maxIteration)];
+    private static byte[] CreateImage(ImageSize imageSize, int bytesPerPixel) => new byte[imageSize.Width * imageSize.Height * bytesPerPixel];
 
     private static void
-    MandelbrotSet(byte[] canvas, int canvasWidth, int canvasHeight, double xMin, double xMax, double yMin, double yMax, int maxIterations, (int Adress, double Coordinate)[] xCoordinates)
-        => YCoordinates(canvasWidth, canvasHeight, yMin, yMax)
+    MandelbrotSet(byte[] image, int imageWidth, int imageHeight, double xMin, double xMax, double yMin, double yMax, int maxIterations, int bytesPerPixel, (int Adress, double Coordinate)[] xCoordinates)
+        => YCoordinates(imageWidth, imageHeight, yMin, yMax, bytesPerPixel)
            .AsParallel()
            .ForAll(y => xCoordinates
-                        .ForEach(x => MandelbrotPixel(canvas, y.Adress + x.Adress, x.Coordinate, y.Coordinate, maxIterations)));
+                        .ForEach(x => MandelbrotPixel(image, y.Adress + x.Adress, x.Coordinate, y.Coordinate, maxIterations)));
 
 
 
 
       public static IEnumerable<(int Adress, double Coordinate)>
-    YCoordinates(int canvasWidth, int canvasHeight, double yMin, double yMax)
-        => IndicesToCoordinates(canvasWidth, Step(canvasHeight, yMin, yMax), canvasHeight, yMin);
+    YCoordinates(int imageWidth, int imageHeight, double yMin, double yMax, int bytesPerPixel)
+        => IndicesToCoordinates(imageWidth * bytesPerPixel, Step(imageHeight, yMin, yMax), imageHeight, yMin);
 
 
       public static (int Adress, double Coordinate)[]
-    XCoordinates(int canvasWidth, double xMin, double xMax)
-        => IndicesToCoordinates(1, Step(canvasWidth, xMin, xMax), canvasWidth, xMin).ToArray();
+    XCoordinates(int imageWidth, double xMin, double xMax, int bytesPerPixel)
+        => IndicesToCoordinates(bytesPerPixel, Step(imageWidth, xMin, xMax), imageWidth, xMin).ToArray();
 
 
     public static double Step(int size, double min, double max) => (max - min) / (size - 1);
 
 
       public static IEnumerable<(int Adress, double Coordinate)>
-    IndicesToCoordinates(int addressStep, double step, int canvasSize, double min)
-        => Enumerable.Range(0, canvasSize).Select(i => (IndexToAddress(i, addressStep), IndexToCoordinate(i, min, step)));
+    IndicesToCoordinates(int addressStep, double step, int imageSize, double min)
+        => Enumerable.Range(0, imageSize).Select(i => (IndexToAddress(i, addressStep), IndexToCoordinate(i, min, step)));
 
     public static int IndexToAddress(int index, int addressStep) => index * addressStep;
 
     public static double IndexToCoordinate(int index, double min, double step) => min + index * step;
 
-    public static void MandelbrotPixel(byte[] canvas, int address, double x, double y, int maxIterations)
+    public static void MandelbrotPixel(byte[] image, int address, double x, double y, int maxIterations)
     {
         var xVal = 0.0;
         var yVal = 0.0;
         var xQuad = 0.0;
         var yQuad = 0.0;
-        byte iteration = 0;
+        int iteration = 0;
         do
         {
             yVal = 2 * xVal * yVal - y;
@@ -70,6 +79,11 @@ public class Generating
             iteration++;
         } while (iteration < maxIterations && xQuad + yQuad < 8);
 
-        canvas[address] = iteration;
+        var bytesPerPixel = BytesPerNumber(maxIterations);
+        for (var i = 0; i < bytesPerPixel; i++)
+        {
+            image[address++] = (byte)(iteration & 0xFF);
+            iteration >>= 8;
+        }
     }
 }
