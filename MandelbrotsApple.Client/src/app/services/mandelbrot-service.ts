@@ -10,6 +10,7 @@ import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
 import { ImageVector } from '../model/image-vector';
 import { MandelbrotMoveParameter } from '../model/mandelbrot-move-parameter';
 import { Semaphore } from './Semaphore';
+import { max } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -27,9 +28,9 @@ export class MandelbrotService {
         );
     }
 
-    public async getInitialMandelbrotSet(imageData: ImageData, canvasSize: ImageSize) : Promise<void> {
-        const result
-            = await this.mandebrotWebApi.getInitialMandelbrotSet(canvasSize.Width, canvasSize.Height, 255);
+
+    public async getInitialMandelbrotSet(imageSize: ImageSize ,imageData: ImageData, maxIterations: number) : Promise<void> {
+        const result = await this.mandebrotWebApi.getInitialMandelbrotSet(imageSize.Width, imageSize.Height, maxIterations);
         if(!result.HasErrors)
             this.mapMandelbrotResult(result, imageData.data);
 
@@ -37,11 +38,8 @@ export class MandelbrotService {
     }
 
 
-    public async refreshedMandelbrotSet(
-        imageData: ImageData,
-        canvasSize: ImageSize)
-    : Promise<void> {
-        const parameter = new MandelbrotParameter(canvasSize, this._currentMandelbrotSize, 255);
+    public async refreshedMandelbrotSet(imageSize: ImageSize ,imageData: ImageData, maxIterations: number) : Promise<void> {
+        const parameter = new MandelbrotParameter(imageSize, this._currentMandelbrotSize, maxIterations);
         const result = await this.mandebrotWebApi.getRefreshedMandelbrotSet(parameter);
         if(result.HasErrors)
             return;;
@@ -50,17 +48,19 @@ export class MandelbrotService {
         this._currentMandelbrotSize = result.MandelbrotSize;
     }
 
+
     public async zoomMandelbrotSet(
+        imageSize: ImageSize,
         imageData: ImageData,
+        maxIterations: number,
         mousePosition: ImagePosition,
-        delta: number,
-        canvasSize: ImageSize)
+        delta: number)
     : Promise<void> {
         const zoomIn = delta > 0;
 
         const lock = await this._semaphore.acquire()
 
-        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, canvasSize, this._currentMandelbrotSize, 255);
+        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, imageSize, this._currentMandelbrotSize, maxIterations);
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
 
         if(!result.HasErrors) {
@@ -71,23 +71,21 @@ export class MandelbrotService {
         lock.release();
     }
 
-    private count: number = 1;
 
     public async moveMandelbrotSetAsync(
+        imageSize: ImageSize,
         imageData: ImageData,
+        maxIterations: number,
         startPosition: ImagePosition,
-        endPosition: ImagePosition,
-        canvasSize: ImageSize)
+        endPosition: ImagePosition)
     : Promise<void> {
         const vx = endPosition.X - startPosition.X;
         const vy = endPosition.Y - startPosition.Y;
         const mouseVector = new ImageVector(vx, vy);
 
-        const id = this.count++;
-
         const lock = await this._semaphore.acquire()
 
-        const moveParameter = new MandelbrotMoveParameter(mouseVector, canvasSize, this._currentMandelbrotSize, 255);
+        const moveParameter = new MandelbrotMoveParameter(mouseVector, imageSize, this._currentMandelbrotSize, maxIterations);
         const result = await this.mandebrotWebApi.moveMandelbrotSetAsync(moveParameter);
 
         if(!result.HasErrors) {
@@ -97,6 +95,8 @@ export class MandelbrotService {
 
         lock.release();
     }
+
+
 
     private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
         let index = 0;
@@ -129,7 +129,7 @@ export class MandelbrotService {
                 case 7:  return [0, 218, 0, 255];
                 case 8:  return [0, 200, 0, 255];
 
-                case 9:  return [0, 0, 0, 255];
+                case 9:  return [200, 0, 0, 255];
                 case 10: return [218, 0, 0, 255];
                 case 11: return [236, 0, 0, 255];
                 case 12: return [255, 0, 0, 255];
