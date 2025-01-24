@@ -2,13 +2,20 @@ import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { MandelbrotService } from '../services/mandelbrot-service';
 import { ImagePosition } from '../model/image-position';
 import { ImageSize } from '../model/image-size';
-import { fromEvent } from 'rxjs';
+import { fromEvent, of } from 'rxjs';
 import {
     throttleTime,
     debounceTime,
     filter,
     bufferTime,
     map,
+    debounce,
+    distinctUntilChanged,
+    switchMap,
+    scan,
+    startWith,
+    reduce,
+    mergeMap,
 } from 'rxjs/operators';
 
 @Component({
@@ -53,29 +60,52 @@ export class MandelbrotViewComponent implements AfterViewInit {
             );
             this.drawAsync();
 
-            // Erstelle ein Observable für Mausereignisse
             fromEvent<MouseEvent>(this.canvas, 'mousemove')
-                .pipe(
-                    filter((event) => event.buttons === 1),
-                    throttleTime(300) // Nimmt nur jedes Ereignis nach 100 ms
-                    //debounceTime(300) // Nimmt das letzte Ereignis, wenn nach 1 Sekunde kein weiteres Ereignis eintrifft
-                )
-                .subscribe((event) => this.onMouseMove(event));
+            .pipe(
+              filter((event) => event.buttons === 1),
+              throttleTime(100), // Nimmt alle Events innerhalb von 100ms den letzten
+              switchMap(event => fromEvent<MouseEvent>(this.canvas!, 'mousemove').pipe(
+                filter((event) => event.buttons === 1),
+                debounceTime(300), // Wenn 300ms kein Event mehr kam, dann den letzten nehmen
+                startWith(event) // Startet mit dem letzten Event von throttleTime
+              ))
+            )
+            .subscribe((event) => this.onMouseMove(event));
 
-            // fromEvent<WheelEvent>(this.canvas, 'wheel')
-            //     .pipe(
-            //         throttleTime(300), // Kumuliert Ereignisse innerhalb von 300 ms
-            //         scan((acc, event) => {
-            //             const delta = Math.sign(event.deltaY);
-            //             return {
-            //               up: delta < 0 ? acc.up + 1 : acc.up,
-            //               down: delta > 0 ? acc.down + 1 : acc.down
-            //             };
-            //           }, { up: 0, down: 0 })
-            //                     )
-            //     .subscribe((event) => this.onMouseWheel(event));
+            fromEvent<WheelEvent>(this.canvas, 'wheel')
+            .pipe(
+              bufferTime(200), // Sammle alle Events innerhalb von 100ms
+              filter(events => events.length > 0), // Ignoriere leere Buffers
+              map(events => events.reduce((acc, event) => {
+                return {
+                  x: event.clientX,
+                  y: event.clientY,
+                  delta: acc.delta + event.deltaY / 100
+                };
+              }, { x: 0, y: 0, delta: 0 })) // Addiere die Events auf
+            )
+            .subscribe((event) => this.onWheel(event));
         }
     }
+
+    async onWheel(event: any) {
+        const position = this.imagePosition(event.x, event.y);
+        const delta = event.delta;
+
+        await this._mandelbrotService.zoomMandelbrotSet(
+            this.imageSize,
+            this.imageData,
+            this.maxIterations,
+            position,
+            delta
+        );
+        this.drawAsync();
+
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+
 
     async onMouseDown(event: MouseEvent) {
         if (event.buttons !== 0) {
@@ -112,6 +142,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
     }
 
     async onMouseWheel(event: WheelEvent) {
+return;
         const position = this.imagePosition(event.clientX, event.clientY);
         const delta = event.deltaY;
 

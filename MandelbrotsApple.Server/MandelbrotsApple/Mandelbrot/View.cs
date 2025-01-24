@@ -44,7 +44,9 @@ public static class View
         var mousePosition = zoomParameter.MousePosition;
         var imageSize = zoomParameter.ImageSize;
         var mandelbrotSize = zoomParameter.CurrentMandelbrotSize;
-        var zoomFactor = zoomParameter.ZoomIn ? 0.9 : 1.1;
+
+        var singleZoomFactor = zoomParameter.ZoomIn ? 0.9 : 1.1;
+        var zoomFactor = Math.Pow(singleZoomFactor, zoomParameter.zoomCount);
 
         var startMandelBrotPosition = MandelbrotPosition(mousePosition, imageSize, mandelbrotSize);
 
@@ -77,11 +79,6 @@ public static class View
         var newYMin = mandelbrotSize.Min.Y - mandelbrotVector.Vy;
         var newXMax = mandelbrotSize.Max.X - mandelbrotVector.Vx;
         var newYMax = mandelbrotSize.Max.Y - mandelbrotVector.Vy;
-
-        Console.WriteLine($"OldMin({mandelbrotSize.Min.X})");
-        Console.WriteLine($"NewMin({newXMin})");
-        Console.WriteLine();
-
 
         var movedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));
 

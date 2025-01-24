@@ -57,10 +57,11 @@ export class MandelbrotService {
         delta: number)
     : Promise<void> {
         const zoomIn = delta > 0;
+        const zoomCount = Math.abs(delta);
 
         const lock = await this._semaphore.acquire()
 
-        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, imageSize, this._currentMandelbrotSize, maxIterations);
+        const zoomParameter = new MandelbrotZoomParameter(mousePosition, zoomIn, zoomCount, imageSize, this._currentMandelbrotSize, maxIterations);
         const result = await this.mandebrotWebApi.zoomMandelbrotSet(zoomParameter);
 
         if(!result.HasErrors) {
