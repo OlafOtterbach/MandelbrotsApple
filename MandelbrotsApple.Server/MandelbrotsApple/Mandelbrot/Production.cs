@@ -22,5 +22,5 @@ public static class Production
                    validResult => validResult);
 
     private static MandelbrotResult MandelbrotSet(MandelbrotParameter parameter)
-        => ImageResult(parameter.CurrentMandelbrotSize, MandelbrotImage(parameter));
+        => ImageResult(parameter.CurrentMandelbrotSize, MandelbrotImage(parameter), parameter.MaxIterations);
 }

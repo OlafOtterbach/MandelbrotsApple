@@ -34,10 +34,10 @@ export class MandelbrotViewComponent implements AfterViewInit {
     private imageContext: CanvasRenderingContext2D | null = null;
     private imageData!: ImageData;
     private imageSize: ImageSize = new ImageSize(1024, 1024); //new ImageSize(640, 480);
-    private maxIterations: number = 255;
+    private maxIterations: number = 511;
 
-    private mouseDown: boolean = false;
-    private mouseMoved: boolean = false;
+    // private mouseDown: boolean = false;
+    // private mouseMoved: boolean = false;
     private currentPosition: ImagePosition = new ImagePosition(-1, -1);
 
     constructor(private _mandelbrotService: MandelbrotService) {}
@@ -111,18 +111,18 @@ export class MandelbrotViewComponent implements AfterViewInit {
         if (event.buttons !== 0) {
             const position = this.imagePosition(event.clientX, event.clientY);
             this.currentPosition = new ImagePosition(position.X, position.Y);
-            this.mouseDown = true;
-            this.mouseMoved = false;
+            // this.mouseDown = true;
+            // this.mouseMoved = false;
         }
     }
 
     async onMouseUp() {
-        this.mouseDown = false;
-        this.mouseMoved = false;
+        // this.mouseDown = false;
+        // this.mouseMoved = false;
     }
 
     async onMouseMove(event: MouseEvent) {
-        this.mouseMoved = true;
+        // this.mouseMoved = true;
 
         const startPosition = this.currentPosition;
         const endPosition = this.imagePosition(event.clientX, event.clientY);
@@ -141,23 +141,6 @@ export class MandelbrotViewComponent implements AfterViewInit {
         event.preventDefault();
     }
 
-    async onMouseWheel(event: WheelEvent) {
-return;
-        const position = this.imagePosition(event.clientX, event.clientY);
-        const delta = event.deltaY;
-
-        await this._mandelbrotService.zoomMandelbrotSet(
-            this.imageSize,
-            this.imageData,
-            this.maxIterations,
-            position,
-            delta
-        );
-        this.drawAsync();
-
-        event.stopPropagation();
-        event.preventDefault();
-    }
 
     public async onResize(_: Event) {
         await this._mandelbrotService.refreshedMandelbrotSet(

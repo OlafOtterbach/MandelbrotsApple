@@ -79,11 +79,18 @@ public class Generating
             iteration++;
         } while (iteration < maxIterations && xQuad + yQuad < 8);
 
+        var original = iteration;
+
         var bytesPerPixel = BytesPerNumber(maxIterations);
-        for (var i = 0; i < bytesPerPixel; i++)
+        for (var i = bytesPerPixel - 1; i >= 0; i--)
         {
-            image[address++] = (byte)(iteration & 0xFF);
+            image[address + i] = (byte)(iteration & 0xFF);
             iteration >>= 8;
+        }
+        if(address == 0)
+        {
+            var h = image[0];
+            var l = image[1];
         }
     }
 }

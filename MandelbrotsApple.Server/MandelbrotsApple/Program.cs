@@ -32,9 +32,9 @@ app.UseCors();
 app.MapGet("/", () => "Hello Mandelbrot!");
 
 app.MapGet(
-    "/{width}/{height}/initialize",
-    ([FromRoute] int width, [FromRoute] int height) 
-        => Results.Json(Initialize(new ImageSize(width, height)), jsonOptions));
+    "/{width}/{height}/{maxIterations}/initialize",
+    ([FromRoute] int width, [FromRoute] int height, [FromRoute] int maxIterations) 
+        => Results.Json(Initialize(new ImageSize(width, height), maxIterations), jsonOptions));
 
 app.MapPost(
     "/refresh",

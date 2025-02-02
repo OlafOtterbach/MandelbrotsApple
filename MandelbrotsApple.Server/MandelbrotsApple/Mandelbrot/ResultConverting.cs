@@ -1,15 +1,16 @@
 ﻿namespace MandelbrotsApple.Mandelbrot;
 
 using LaYumba.Functional;
+using static Common;
 
 public static class ResultConverting
 {
-    public static Func<MandelbrotSize, byte[], MandelbrotResult> ImageResult 
-        => (MandelbrotSize mandelbrotSize, byte[] image)
-              => new MandelbrotResult(image.ToImageData(), 1, mandelbrotSize, Array.Empty<ErrorType>(), false);
+    public static Func<MandelbrotSize, byte[], int, MandelbrotResult> ImageResult 
+        => (MandelbrotSize mandelbrotSize, byte[] image, int maxIterations)
+              => new MandelbrotResult(image.ToImageData(), BytesPerNumber(maxIterations), maxIterations, mandelbrotSize, Array.Empty<ErrorType>(), false);
 
     public static MandelbrotResult ErrorResult(IEnumerable<Error> errors)
-        => new MandelbrotResult(string.Empty, 1, MandelbrotSize.Empty, errors.OfType<ValidationError>().Select(e => e.ErrorType).ToArray(), true);
+        => new MandelbrotResult(string.Empty, 0, 0, MandelbrotSize.Empty, errors.OfType<ValidationError>().Select(e => e.ErrorType).ToArray(), true);
 
 
     private static string ToImageData(this byte[] image) => new string(image.SelectMany(ToNibbles).ToArray());

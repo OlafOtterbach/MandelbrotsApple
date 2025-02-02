@@ -10,7 +10,6 @@ import { MandelbrotZoomParameter } from '../model/mandelbrot-zoom-parameter';
 import { ImageVector } from '../model/image-vector';
 import { MandelbrotMoveParameter } from '../model/mandelbrot-move-parameter';
 import { Semaphore } from './Semaphore';
-import { max } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -98,15 +97,36 @@ export class MandelbrotService {
     }
 
 
+    // private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
+    //     let index = 0;
+    //     const codedData = mandelbrotResult.ImageData;
+    //     for (let i = 0; i < codedData.length; i += 2) {
+    //         const high = codedData[i];
+    //         const low = codedData[i + 1];
+    //         const color = this.color(this.convertToByte(high, low), 255);
+
+    //         [map[index], map[index + 1], map[index + 2], map[index + 3]] = color;
+    //         index += 4;
+    //     }
+    // }
+
+
+
 
     private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
         let index = 0;
         const codedData = mandelbrotResult.ImageData;
-        for (let i = 0; i < codedData.length; i += 2) {
-            const high = codedData[i];
-            const low = codedData[i + 1];
-            const color = this.color(this.convertToByte(high, low), 255);
+        for (let i = 0; i < codedData.length; i += mandelbrotResult.BytesPerPixel * 2) {
+            let num = 0;
 
+            for(let j = 0; j < mandelbrotResult.BytesPerPixel * 2; j += 2) {
+                const high = codedData[i + j];
+                const low = codedData[i + j + 1];
+                const byte = this.convertToByte(high, low);
+                num = num << 8 | byte;
+            }
+
+            const color = this.color(num, mandelbrotResult.MaxIterations);
             [map[index], map[index + 1], map[index + 2], map[index + 3]] = color;
             index += 4;
         }

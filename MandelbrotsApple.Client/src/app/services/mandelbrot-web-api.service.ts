@@ -17,7 +17,7 @@ export class MandelbrotWebApiService {
         height: number,
         maxIterations: number)
     : Promise<MandelbrotResult> {
-        const url = `http://localhost:5200/${width}/${height}/initialize`;
+        const url = `http://localhost:5200/${width}/${height}/${maxIterations}/initialize`;
         const result = await lastValueFrom(this.httpClient.get<MandelbrotResult>(url));
         return result;
     }

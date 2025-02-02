@@ -27,7 +27,7 @@ public readonly record struct MandelbrotZoomParameter(Imageosition MousePosition
 
 public readonly record struct MandelbrotMoveParameter(ImageVector MouseVector, ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
-public readonly record struct MandelbrotResult(string ImageData, int BytesPerPixel, MandelbrotSize MandelbrotSize, ErrorType[] Errors, bool HasErrors);
+public readonly record struct MandelbrotResult(string ImageData, int BytesPerPixel, int MaxIterations, MandelbrotSize MandelbrotSize, ErrorType[] Errors, bool HasErrors);
 
 
 public enum ErrorType
