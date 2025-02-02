@@ -100,9 +100,6 @@ export class MandelbrotViewComponent implements AfterViewInit {
             delta
         );
         this.drawAsync();
-
-        event.stopPropagation();
-        event.preventDefault();
     }
 
 
