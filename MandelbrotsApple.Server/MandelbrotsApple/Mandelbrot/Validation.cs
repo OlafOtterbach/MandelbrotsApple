@@ -123,7 +123,7 @@ public static class Validation
 
     public static Validation<MandelbrotParameter>
     Validate_Iteration_Maximum(MandelbrotParameter parameter)
-        => parameter.MaxIterations <= 1000
+        => parameter.MaxIterations <= 10000
             ? parameter
             : IterationGreaterThanThousandError;
 }
