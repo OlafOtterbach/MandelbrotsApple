@@ -1,14 +1,13 @@
 html, body {
     margin: 0;
     padding: 0;
-    width: 100vw;
-    height: 100vh;
     overflow: hidden;
 }
 
 .containerSize {
-    margin: 0;
-    padding: 0;
+    position:fixed;
+    left:0;
+    top:0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
@@ -18,8 +17,8 @@ html, body {
 }
 
 .canvasSize {
-    margin: 0;
-    padding: 0;
+    background-color: black;
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
 }

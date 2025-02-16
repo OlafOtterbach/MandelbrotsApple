@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    ViewChild,
+} from '@angular/core';
 import { MandelbrotService } from '../services/mandelbrot-service';
 import { ImagePosition } from '../model/image-position';
 import { ImageSize } from '../model/image-size';
@@ -37,9 +43,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
     private maxIterations: number = 255;
     private currentPosition: ImagePosition = new ImagePosition(-1, -1);
 
-
     constructor(private _mandelbrotService: MandelbrotService) {}
-
 
     async ngAfterViewInit() {
         this.canvas = this.canvasRef.nativeElement as HTMLCanvasElement;
@@ -60,33 +64,39 @@ export class MandelbrotViewComponent implements AfterViewInit {
             this.onResize(new Event('resize'));
 
             fromEvent<MouseEvent>(this.canvas, 'mousemove')
-            .pipe(
-              filter((event) => event.buttons === 1),
-              throttleTime(100), // Nimmt alle Events innerhalb von 100ms den letzten
-              switchMap(event => fromEvent<MouseEvent>(this.canvas!, 'mousemove').pipe(
-                filter((event) => event.buttons === 1),
-                debounceTime(300), // Wenn 300ms kein Event mehr kam, dann den letzten nehmen
-                startWith(event) // Startet mit dem letzten Event von throttleTime
-              ))
-            )
-            .subscribe((event) => this.onMouseMove(event));
+                .pipe(
+                    filter((event) => event.buttons === 1),
+                    throttleTime(100), // Nimmt alle Events innerhalb von 100ms den letzten
+                    switchMap((event) =>
+                        fromEvent<MouseEvent>(this.canvas!, 'mousemove').pipe(
+                            filter((event) => event.buttons === 1),
+                            debounceTime(300), // Wenn 300ms kein Event mehr kam, dann den letzten nehmen
+                            startWith(event) // Startet mit dem letzten Event von throttleTime
+                        )
+                    )
+                )
+                .subscribe((event) => this.onMouseMove(event));
 
             fromEvent<WheelEvent>(this.canvas, 'wheel')
-            .pipe(
-              bufferTime(200), // Sammle alle Events innerhalb von 100ms
-              filter(events => events.length > 0), // Ignoriere leere Buffers
-              map(events => events.reduce((acc, event) => {
-                return {
-                  x: event.clientX,
-                  y: event.clientY,
-                  delta: acc.delta + event.deltaY / 100
-                };
-              }, { x: 0, y: 0, delta: 0 })) // Addiere die Events auf
-            )
-            .subscribe((event) => this.onWheel(event));
+                .pipe(
+                    bufferTime(200), // Sammle alle Events innerhalb von 100ms
+                    filter((events) => events.length > 0), // Ignoriere leere Buffers
+                    map((events) =>
+                        events.reduce(
+                            (acc, event) => {
+                                return {
+                                    x: event.clientX,
+                                    y: event.clientY,
+                                    delta: acc.delta + event.deltaY / 100,
+                                };
+                            },
+                            { x: 0, y: 0, delta: 0 }
+                        )
+                    ) // Addiere die Events auf
+                )
+                .subscribe((event) => this.onWheel(event));
         }
     }
-
 
     async onWheel(event: any) {
         const position = this.imagePosition(event.x, event.y);
@@ -102,14 +112,12 @@ export class MandelbrotViewComponent implements AfterViewInit {
         this.drawAsync();
     }
 
-
     async onMouseDown(event: MouseEvent) {
         if (event.buttons !== 0) {
             const position = this.imagePosition(event.clientX, event.clientY);
             this.currentPosition = new ImagePosition(position.X, position.Y);
         }
     }
-
 
     async onMouseMove(event: MouseEvent) {
         const startPosition = this.currentPosition;
@@ -129,16 +137,14 @@ export class MandelbrotViewComponent implements AfterViewInit {
         event.preventDefault();
     }
 
-
+    @HostListener('window:resize', ['$event'])
     public async onResize(_: Event) {
-        if(!this.canvas)
-            return;
+        if (!this.canvas) return;
 
-        this.canvas.width = this.canvas.offsetWidth;
-        this.canvas.height = this.canvas.offsetHeight;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
         this.drawAsync();
     }
-
 
     private async drawAsync() {
         if (this.imageContext != null) {
@@ -155,20 +161,32 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
         const canvasSize = this.getCanvasSize();
         if (this.imageCanvas) {
+            const aspectRatio = this.imageSize.Width / this.imageSize.Height;
+            let drawWidth = canvasSize.Width;
+            let drawHeight = canvasSize.Height;
+
+            if (canvasSize.Width / canvasSize.Height > aspectRatio) {
+                drawWidth = canvasSize.Height * aspectRatio;
+            } else {
+                drawHeight = canvasSize.Width / aspectRatio;
+            }
+
+            const offsetX = (canvasSize.Width - drawWidth) / 2;
+            const offsetY = (canvasSize.Height - drawHeight) / 2;
+
             this.context.drawImage(
                 this.imageCanvas,
                 0,
                 0,
                 this.imageSize.Width,
                 this.imageSize.Height,
-                0,
-                0,
-                canvasSize.Width,
-                canvasSize.Height
+                offsetX,
+                offsetY,
+                drawWidth,
+                drawHeight
             );
         }
     }
-
 
     private imagePosition(
         screenPositionX: number,
@@ -191,13 +209,11 @@ export class MandelbrotViewComponent implements AfterViewInit {
         return pos;
     }
 
-
     private getCanvasSize(): ImageSize {
         const width = this.context.canvas.offsetWidth;
         const height = this.context.canvas.offsetHeight;
         return new ImageSize(width, height);
     }
-
 
     private getImageData(imageSize: ImageSize): ImageData {
         return this.context.getImageData(
