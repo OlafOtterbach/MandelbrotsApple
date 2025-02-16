@@ -1,9 +1,7 @@
-<div class= "containerFixed" (window:resize)="onResize($event)">
+<div (window:resize)="onResize($event)"
+  class="containerSize">
   <canvas #canvasId
-   width="800"
-   height="600"
-   scale="2.0"
-   style="border:1px solid #000000;"
+   class="canvasSize"
    (mousedown)="onMouseDown($event)"
   ></canvas>
 </div>

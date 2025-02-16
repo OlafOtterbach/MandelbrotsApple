@@ -34,7 +34,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
     private imageContext: CanvasRenderingContext2D | null = null;
     private imageData!: ImageData;
     private imageSize: ImageSize = new ImageSize(1024, 1024); //new ImageSize(640, 480);
-    private maxIterations: number = 1024;
+    private maxIterations: number = 255;
     private currentPosition: ImagePosition = new ImagePosition(-1, -1);
 
 
@@ -57,7 +57,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 this.imageData,
                 this.maxIterations
             );
-            this.drawAsync();
+            this.onResize(new Event('resize'));
 
             fromEvent<MouseEvent>(this.canvas, 'mousemove')
             .pipe(
@@ -131,17 +131,17 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
 
     public async onResize(_: Event) {
-        await this._mandelbrotService.refreshedMandelbrotSet(
-            this.imageSize,
-            this.imageData,
-            this.maxIterations
-        );
+        if(!this.canvas)
+            return;
+
+        this.canvas.width = this.canvas.offsetWidth;
+        this.canvas.height = this.canvas.offsetHeight;
         this.drawAsync();
     }
 
 
     private async drawAsync() {
-        if (this.imageContext != null)
+        if (this.imageContext != null) {
             this.imageContext.putImageData(
                 this.imageData,
                 0,
@@ -151,9 +151,10 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 this.imageSize.Width,
                 this.imageSize.Height
             );
+        }
 
         const canvasSize = this.getCanvasSize();
-        if (this.imageCanvas)
+        if (this.imageCanvas) {
             this.context.drawImage(
                 this.imageCanvas,
                 0,
@@ -165,6 +166,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 canvasSize.Width,
                 canvasSize.Height
             );
+        }
     }
 
 
@@ -191,8 +193,8 @@ export class MandelbrotViewComponent implements AfterViewInit {
 
 
     private getCanvasSize(): ImageSize {
-        const width = this.context.canvas.width;
-        const height = this.context.canvas.height;
+        const width = this.context.canvas.offsetWidth;
+        const height = this.context.canvas.offsetHeight;
         return new ImageSize(width, height);
     }
 
