@@ -39,7 +39,8 @@ export class MandelbrotViewComponent implements AfterViewInit {
     private imageCanvas: HTMLCanvasElement | undefined;
     private imageContext: CanvasRenderingContext2D | null = null;
     private imageData!: ImageData;
-    private imageSize: ImageSize = new ImageSize(1024, 1024); //new ImageSize(640, 480);
+    private imageBase = 1024;
+    private imageSize: ImageSize = new ImageSize(this.imageBase, this.imageBase);
     private maxIterations: number = 255;
     private currentPosition: ImagePosition = new ImagePosition(-1, -1);
 
@@ -61,7 +62,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 this.imageData,
                 this.maxIterations
             );
-            this.onResize(new Event('resize'));
+            this.onResizeFast(new Event('resize'));
 
             fromEvent<MouseEvent>(this.canvas, 'mousemove')
                 .pipe(
@@ -95,6 +96,20 @@ export class MandelbrotViewComponent implements AfterViewInit {
                     ) // Addiere die Events auf
                 )
                 .subscribe((event) => this.onWheel(event));
+
+            // Resize event handling
+            fromEvent(window, 'resize')
+                .pipe(
+                    throttleTime(100),
+                    switchMap(() => {
+                        this.onResizeFast(new Event('resize'));
+                        return fromEvent(window, 'resize').pipe(
+                            debounceTime(500),
+                            startWith(null)
+                        );
+                    })
+                )
+                .subscribe(() => this.onResizeSlow(new Event('resize')));
         }
     }
 
@@ -137,8 +152,40 @@ export class MandelbrotViewComponent implements AfterViewInit {
         event.preventDefault();
     }
 
-    @HostListener('window:resize', ['$event'])
-    public async onResize(_: Event) {
+
+    public async onResizeSlow(_: Event) {
+        if (!this.canvas) return;
+        if(!this.imageData) return;
+        if(!this.imageCanvas) return;
+
+        const canvasWidth = window.innerWidth;
+        const canvasHeight = window.innerHeight;
+
+        const aspectRatio = canvasWidth / canvasHeight;
+        if(canvasWidth >= canvasHeight) {
+            this.imageSize.Width = this.imageBase;
+            this.imageSize.Height = Math.floor(this.imageBase / aspectRatio);
+        } else {
+            this.imageSize.Width = Math.floor(this.imageBase * aspectRatio);
+            this.imageSize.Height = this.imageBase;
+        }
+
+        this.imageData = this.getImageData(this.imageSize);
+
+        this.imageCanvas.width = this.imageSize.Width;
+        this.imageCanvas.height = this.imageSize.Height;
+
+        await this._mandelbrotService.refreshedMandelbrotSet(
+            this.imageSize,
+            this.imageData,
+            this.maxIterations
+        );
+
+        this.drawAsync();
+    }
+
+
+    public async onResizeFast(_: Event) {
         if (!this.canvas) return;
 
         this.canvas.width = window.innerWidth;
@@ -159,16 +206,19 @@ export class MandelbrotViewComponent implements AfterViewInit {
             );
         }
 
+        // KI-Generiert auf die AnfrageS
+        // "Wie kann ich das Image in drawAsync so ausgeben, dass das Verhältnis Width und Height nicht verändert wird?"
         const canvasSize = this.getCanvasSize();
         if (this.imageCanvas) {
-            const aspectRatio = this.imageSize.Width / this.imageSize.Height;
+            const aspectRatioImage = this.imageSize.Width / this.imageSize.Height;
+            const aspectRatioCanvas = canvasSize.Width / canvasSize.Height;
             let drawWidth = canvasSize.Width;
             let drawHeight = canvasSize.Height;
 
-            if (canvasSize.Width / canvasSize.Height > aspectRatio) {
-                drawWidth = canvasSize.Height * aspectRatio;
+            if (aspectRatioCanvas > aspectRatioImage) {
+                drawWidth = canvasSize.Height * aspectRatioImage;
             } else {
-                drawHeight = canvasSize.Width / aspectRatio;
+                drawHeight = canvasSize.Width / aspectRatioImage;
             }
 
             const offsetX = (canvasSize.Width - drawWidth) / 2;
