@@ -98,17 +98,14 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 .subscribe((event) => this.onWheel(event));
 
             // Resize event handling
-            fromEvent(window, 'resize')
-                .pipe(
-                    throttleTime(100),
-                    switchMap(() => {
-                        this.onResizeFast(new Event('resize'));
-                        return fromEvent(window, 'resize').pipe(
-                            debounceTime(500),
-                            startWith(null)
-                        );
-                    })
-                )
+            const resize$ = fromEvent(window, 'resize');
+
+            resize$
+                .pipe(throttleTime(100))
+                .subscribe(() => this.onResizeFast(new Event('resize')));
+
+            resize$
+                .pipe(debounceTime(300))
                 .subscribe(() => this.onResizeSlow(new Event('resize')));
         }
     }
