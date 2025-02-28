@@ -22,6 +22,7 @@ import {
     startWith,
     reduce,
     mergeMap,
+    sampleTime,
 } from 'rxjs/operators';
 
 @Component({
@@ -64,23 +65,10 @@ export class MandelbrotViewComponent implements AfterViewInit {
             );
             this.onResizeFast(new Event('resize'));
 
-            // fromEvent<MouseEvent>(this.canvas, 'mousemove')
-            //     .pipe(
-            //         filter((event) => event.buttons === 1),
-            //         throttleTime(100), // Nimmt alle Events innerhalb von 100ms den letzten
-            //         switchMap((event) =>
-            //             fromEvent<MouseEvent>(this.canvas!, 'mousemove').pipe(
-            //                 filter((event) => event.buttons === 1),
-            //                 debounceTime(300), // Wenn 300ms kein Event mehr kam, dann den letzten nehmen
-            //                 startWith(event) // Startet mit dem letzten Event von throttleTime
-            //             )
-            //         )
-            //     )
-            //     .subscribe((event) => this.onMouseMove(event));
             fromEvent<MouseEvent>(this.canvas, 'mousemove')
                 .pipe(
                     filter((event) => event.buttons === 1),
-                    debounceTime(100), // Nimmt alle Events innerhalb von 100ms den Letzten
+                    sampleTime(200), // Nimmt von allen Events innerhalb von 100ms den Letzten
                 )
                 .subscribe((event) => this.onMouseMove(event));
 
@@ -108,7 +96,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
             const resize$ = fromEvent(window, 'resize');
 
             resize$
-                .pipe(throttleTime(100))
+                .pipe(sampleTime(100))
                 .subscribe(() => this.onResizeFast(new Event('resize')));
 
             resize$
