@@ -63,7 +63,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 this.imageData,
                 this.maxIterations
             );
-            this.onResizeFast(new Event('resize'));
+            this.onResizeSlow(new Event('resize'));
 
             fromEvent<MouseEvent>(this.canvas, 'mousemove')
                 .pipe(
@@ -173,7 +173,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
             this.maxIterations
         );
 
-        this.drawAsync();
+        this.onResizeFast(new Event('resize'));
     }
 
 
@@ -184,6 +184,7 @@ export class MandelbrotViewComponent implements AfterViewInit {
         this.canvas.height = window.innerHeight;
         this.drawAsync();
     }
+
 
     private async drawAsync() {
         if (this.imageContext != null) {
