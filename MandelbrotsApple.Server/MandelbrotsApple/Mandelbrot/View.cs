@@ -90,34 +90,32 @@ public static class View
 
 
 
-    public static MandelbrotPosition MandelbrotPosition(Imageosition imagePosition, ImageSize imageSize, MandelbrotSize mandelbrotSize)
+    private static MandelbrotPosition MandelbrotPosition(Imageosition imagePosition, ImageSize imageSize, MandelbrotSize mandelbrotSize)
     {
+        // aspect ratio difference to squared image in y direction
+        var diff = imageSize.Width - imageSize.Height;
+        var virtualImageHeight = imageSize.Height + diff;
+        var virtualImageYPosition = imagePosition.Y + diff / 2.0;
+
         var mandelbrotMin = mandelbrotSize.Min;
         var mandelbrotMax = mandelbrotSize.Max;
-        var mandelbrotX = mandelbrotMin.X + imagePosition.X * (mandelbrotMax.X - mandelbrotMin.X) / (imageSize.Width - 1);
-        var mandelbrotY = mandelbrotMin.Y + imagePosition.Y * (mandelbrotMax.Y - mandelbrotMin.Y) / (imageSize.Height - 1);
+        var mandelbrotX = mandelbrotMin.X + imagePosition.X  * (mandelbrotMax.X - mandelbrotMin.X) / (imageSize.Width - 1);
+        var mandelbrotY = mandelbrotMin.Y + virtualImageYPosition * (mandelbrotMax.Y - mandelbrotMin.Y) / (virtualImageHeight - 1);
 
         return new MandelbrotPosition(mandelbrotX, mandelbrotY);
     }
 
-    public static MandelbrotVector MandelbrotVector(ImageVector imageVector, ImageSize imageSize, MandelbrotSize mandelbrotSize)
+    private static MandelbrotVector MandelbrotVector(ImageVector imageVector, ImageSize imageSize, MandelbrotSize mandelbrotSize)
     {
+        // aspect ratio difference to squared image in y direction
+        var diff = imageSize.Width - imageSize.Height;
+        var virtualImageHeight = imageSize.Height + diff;
+
         var mandelbrotMin = mandelbrotSize.Min;
         var mandelbrotMax = mandelbrotSize.Max;
         var mandelbrotVx = imageVector.Vx * (mandelbrotMax.X - mandelbrotMin.X) / (imageSize.Width - 1);
-        var mandelbrotVy = imageVector.Vy * (mandelbrotMax.Y - mandelbrotMin.Y) / (imageSize.Height - 1);
+        var mandelbrotVy = imageVector.Vy * (mandelbrotMax.Y - mandelbrotMin.Y) / (virtualImageHeight - 1);
 
         return new MandelbrotVector(mandelbrotVx, mandelbrotVy);
-    }
-
-
-    public static Imageosition ImagePosition(MandelbrotPosition mandelbrotPosition, ImageSize imageSize, MandelbrotSize mandelbrotSize)
-    {
-        var mandelbrotMin = mandelbrotSize.Min;
-        var mandelbrotMax = mandelbrotSize.Max;
-        var imageX = (mandelbrotPosition.X - mandelbrotMin.X) * (imageSize.Width - 1) / (mandelbrotMax.X - mandelbrotMin.X);
-        var imageY = (mandelbrotPosition.Y - mandelbrotMin.Y) * (imageSize.Height - 1) / (mandelbrotMax.Y - mandelbrotMin.Y);
-
-        return new Imageosition(imageX, imageY);
     }
 }

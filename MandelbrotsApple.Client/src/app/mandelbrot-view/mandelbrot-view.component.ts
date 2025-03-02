@@ -156,12 +156,8 @@ export class MandelbrotViewComponent implements AfterViewInit {
         const aspectRatio = canvasWidth / canvasHeight;
         if(canvasWidth >= canvasHeight) {
             this.imageSize = new ImageSize(this.imageBase, Math.floor(this.imageBase / aspectRatio));
-            // this.imageSize.Width = this.imageBase;
-            // this.imageSize.Height = Math.floor(this.imageBase / aspectRatio);
         } else {
             this.imageSize = new ImageSize(Math.floor(this.imageBase * aspectRatio), this.imageBase);
-            // this.imageSize.Width = Math.floor(this.imageBase * aspectRatio);
-            // this.imageSize.Height = this.imageBase;
         }
 
         this.imageData = this.getImageData(this.imageSize);

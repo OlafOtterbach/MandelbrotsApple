@@ -8,22 +8,27 @@ public class Generating
     public static byte[] MandelbrotImage(MandelbrotParameter parameter)
         => MandelbrotImage(parameter, BytesPerNumber(parameter.MaxIterations));
 
-
-
-
     private static byte[] MandelbrotImage(MandelbrotParameter parameter, int bytesPerPixel)
         => MandelbrotImage(parameter, CreateImage(parameter.ImageSize, bytesPerPixel), BytesPerNumber(parameter.MaxIterations));
 
     private static byte[] MandelbrotImage(MandelbrotParameter parameter, byte[] image, int bytesPerPixel)
     {
+        var aspectRaitio = parameter.ImageSize.Width / (double)parameter.ImageSize.Height;
+        var ymin = parameter.CurrentMandelbrotSize.Min.Y;
+        var ymax = parameter.CurrentMandelbrotSize.Max.Y;
+        var height = ymax - ymin;
+        var diff = (height - height / aspectRaitio) / 2.0;
+        ymin += diff;
+        ymax -= diff;
+
         MandelbrotSet(
             image,
             parameter.ImageSize.Width,
             parameter.ImageSize.Height,
             parameter.CurrentMandelbrotSize.Min.X,
             parameter.CurrentMandelbrotSize.Max.X,
-            parameter.CurrentMandelbrotSize.Min.Y,
-            parameter.CurrentMandelbrotSize.Max.Y,
+            ymin,
+            ymax,
             parameter.MaxIterations,
             bytesPerPixel,
             XCoordinates(parameter.ImageSize.Width, parameter.CurrentMandelbrotSize.Min.X, parameter.CurrentMandelbrotSize.Max.X, bytesPerPixel));
@@ -42,22 +47,22 @@ public class Generating
 
 
 
-      public static IEnumerable<(int Adress, double Coordinate)>
-    YCoordinates(int imageWidth, int imageHeight, double yMin, double yMax, int bytesPerPixel)
-        => IndicesToCoordinates(imageWidth * bytesPerPixel, Step(imageHeight, yMin, yMax), imageHeight, yMin);
+    public static IEnumerable<(int Adress, double Coordinate)>
+  YCoordinates(int imageWidth, int imageHeight, double yMin, double yMax, int bytesPerPixel)
+      => IndicesToCoordinates(imageWidth * bytesPerPixel, Step(imageHeight, yMin, yMax), imageHeight, yMin);
 
 
-      public static (int Adress, double Coordinate)[]
-    XCoordinates(int imageWidth, double xMin, double xMax, int bytesPerPixel)
-        => IndicesToCoordinates(bytesPerPixel, Step(imageWidth, xMin, xMax), imageWidth, xMin).ToArray();
+    public static (int Adress, double Coordinate)[]
+  XCoordinates(int imageWidth, double xMin, double xMax, int bytesPerPixel)
+      => IndicesToCoordinates(bytesPerPixel, Step(imageWidth, xMin, xMax), imageWidth, xMin).ToArray();
 
 
     public static double Step(int size, double min, double max) => (max - min) / (size - 1);
 
 
-      public static IEnumerable<(int Adress, double Coordinate)>
-    IndicesToCoordinates(int addressStep, double step, int imageSize, double min)
-        => Enumerable.Range(0, imageSize).Select(i => (IndexToAddress(i, addressStep), IndexToCoordinate(i, min, step)));
+    public static IEnumerable<(int Adress, double Coordinate)>
+  IndicesToCoordinates(int addressStep, double step, int imageSize, double min)
+      => Enumerable.Range(0, imageSize).Select(i => (IndexToAddress(i, addressStep), IndexToCoordinate(i, min, step)));
 
     public static int IndexToAddress(int index, int addressStep) => index * addressStep;
 
@@ -87,7 +92,7 @@ public class Generating
             image[address + i] = (byte)(iteration & 0xFF);
             iteration >>= 8;
         }
-        if(address == 0)
+        if (address == 0)
         {
             var h = image[0];
             var l = image[1];
