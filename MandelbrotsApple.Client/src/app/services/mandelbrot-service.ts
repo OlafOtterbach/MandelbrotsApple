@@ -97,22 +97,6 @@ export class MandelbrotService {
     }
 
 
-    // private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
-    //     let index = 0;
-    //     const codedData = mandelbrotResult.ImageData;
-    //     for (let i = 0; i < codedData.length; i += 2) {
-    //         const high = codedData[i];
-    //         const low = codedData[i + 1];
-    //         const color = this.color(this.convertToByte(high, low), 255);
-
-    //         [map[index], map[index + 1], map[index + 2], map[index + 3]] = color;
-    //         index += 4;
-    //     }
-    // }
-
-
-
-
     private mapMandelbrotResult(mandelbrotResult: MandelbrotResult, map: Uint8ClampedArray) {
         let index = 0;
         const codedData = mandelbrotResult.ImageData;
