@@ -13,6 +13,7 @@ public class Generating
 
     private static byte[] MandelbrotImage(MandelbrotParameter parameter, byte[] image, int bytesPerPixel)
     {
+        // aspect ratio difference to squared image in y direction
         var aspectRaitio = parameter.ImageSize.Width / (double)parameter.ImageSize.Height;
         var ymin = parameter.CurrentMandelbrotSize.Min.Y;
         var ymax = parameter.CurrentMandelbrotSize.Max.Y;
@@ -48,21 +49,21 @@ public class Generating
 
 
     public static IEnumerable<(int Adress, double Coordinate)>
-  YCoordinates(int imageWidth, int imageHeight, double yMin, double yMax, int bytesPerPixel)
-      => IndicesToCoordinates(imageWidth * bytesPerPixel, Step(imageHeight, yMin, yMax), imageHeight, yMin);
+    YCoordinates(int imageWidth, int imageHeight, double yMin, double yMax, int bytesPerPixel)
+        => IndicesToCoordinates(imageWidth * bytesPerPixel, Step(imageHeight, yMin, yMax), imageHeight, yMin);
 
 
     public static (int Adress, double Coordinate)[]
-  XCoordinates(int imageWidth, double xMin, double xMax, int bytesPerPixel)
-      => IndicesToCoordinates(bytesPerPixel, Step(imageWidth, xMin, xMax), imageWidth, xMin).ToArray();
+    XCoordinates(int imageWidth, double xMin, double xMax, int bytesPerPixel)
+        => IndicesToCoordinates(bytesPerPixel, Step(imageWidth, xMin, xMax), imageWidth, xMin).ToArray();
 
 
     public static double Step(int size, double min, double max) => (max - min) / (size - 1);
 
 
     public static IEnumerable<(int Adress, double Coordinate)>
-  IndicesToCoordinates(int addressStep, double step, int imageSize, double min)
-      => Enumerable.Range(0, imageSize).Select(i => (IndexToAddress(i, addressStep), IndexToCoordinate(i, min, step)));
+    IndicesToCoordinates(int addressStep, double step, int imageSize, double min)
+        => Enumerable.Range(0, imageSize).Select(i => (IndexToAddress(i, addressStep), IndexToCoordinate(i, min, step)));
 
     public static int IndexToAddress(int index, int addressStep) => index * addressStep;
 
