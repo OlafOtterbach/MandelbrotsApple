@@ -29,7 +29,7 @@ import {
     selector: 'app-mandelbrot-view',
     standalone: true,
     templateUrl: './mandelbrot-view.component.html',
-    styleUrls: ['./mandelbrot-view.component.css'],
+    styleUrls: ['./mandelbrot-view.component.scss'],
 })
 export class MandelbrotViewComponent implements AfterViewInit {
     @ViewChild('canvasId', { static: true }) canvasRef!: ElementRef;
