@@ -1,7 +1,7 @@
-<div
-  class="containerSize">
+<div class="containerSize">
   <canvas #canvasId
-   class="canvasSize"
-   (mousedown)="onMouseDown($event)"
+    class="canvasSize"
+    (mousedown)="onMouseDown($event)"
   ></canvas>
 </div>
+<mat-checkbox (change)="toggleIterations()">Hiigh Iterations</mat-checkbox>

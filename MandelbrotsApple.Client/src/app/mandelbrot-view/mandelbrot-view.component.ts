@@ -6,6 +6,7 @@ import {
     ViewChild,
 } from '@angular/core';
 import { MandelbrotService } from '../services/mandelbrot-service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ImagePosition } from '../model/image-position';
 import { ImageSize } from '../model/image-size';
 import { fromEvent, of } from 'rxjs';
@@ -30,6 +31,7 @@ import {
     standalone: true,
     templateUrl: './mandelbrot-view.component.html',
     styleUrls: ['./mandelbrot-view.component.scss'],
+    imports: [MatCheckboxModule]
 })
 export class MandelbrotViewComponent implements AfterViewInit {
     @ViewChild('canvasId', { static: true }) canvasRef!: ElementRef;
@@ -104,6 +106,11 @@ export class MandelbrotViewComponent implements AfterViewInit {
                 .subscribe(() => this.onResizeSlow(new Event('resize')));
         }
     }
+
+  async toggleIterations() {
+    this.maxIterations = this.maxIterations == 255 ? 1024 : 255;
+    this.onResizeSlow(new Event('resize'));
+  }
 
     async onWheel(event: any) {
         const position = this.imagePosition(event.x, event.y);
