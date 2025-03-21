@@ -4,4 +4,14 @@
     (mousedown)="onMouseDown($event)"
   ></canvas>
 </div>
-<mat-checkbox (change)="toggleIterations()">Hiigh Iterations</mat-checkbox>
+<div class="slider-container">
+  <mat-slider
+    min="1"
+    max="5"
+    step="1"
+    [(ngModel)]="sliderValue"
+    (input)="onSliderChange($event)"
+ >
+  <input matSliderThumb [(ngModel)]="sliderValue" #slider>
+</mat-slider>
+</div>
