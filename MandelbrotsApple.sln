@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MandelbrotsApple", "MandelbrotsApple\MandelbrotsApple.csproj", "{1DE1C995-D570-4CBD-B52F-CD9454263BA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MandelbrotsApple.Test", "MandelbrotsApple.Test\MandelbrotsApple.Test.csproj", "{EA6A451C-E3BD-9ECB-AC6C-AFD3E615520A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1DE1C995-D570-4CBD-B52F-CD9454263BA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DE1C995-D570-4CBD-B52F-CD9454263BA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DE1C995-D570-4CBD-B52F-CD9454263BA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DE1C995-D570-4CBD-B52F-CD9454263BA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA6A451C-E3BD-9ECB-AC6C-AFD3E615520A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA6A451C-E3BD-9ECB-AC6C-AFD3E615520A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA6A451C-E3BD-9ECB-AC6C-AFD3E615520A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA6A451C-E3BD-9ECB-AC6C-AFD3E615520A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13095EBD-C5B7-47CE-9F2F-40C5853C6453}
+	EndGlobalSection
+EndGlobal
