@@ -19,9 +19,6 @@ public partial class MandelbrotForm : Form
 
         _mandelbrotViewServiceProxy.DrawObservable
             .ObserveOn(SynchronizationContext.Current)
-            .ObserveOn(SynchronizationContext.Current)
-            .ObserveOn(SynchronizationContext.Current)
-            .ObserveOn(SynchronizationContext.Current)
             .Subscribe(result => DrawMandelbrotResult(result));
 
         this.MinimumSize = new Size(800, 600);
@@ -59,8 +56,8 @@ public partial class MandelbrotForm : Form
         {
             int canvasX = e.X;
             int canvasY = e.Y;
-            var x = (int)(canvasX * _resolutionFactor);
-            var y = (int)(canvasY * _resolutionFactor);
+            var x = XLow(e.X);// (int)(canvasX * _resolutionFactor);
+            var y = YLow(e.Y);// (int)(canvasY * _resolutionFactor);
             _mandelbrotViewServiceProxy.SetMouseStart(x, y);
             _mouseDown = true;
         }
@@ -82,11 +79,7 @@ public partial class MandelbrotForm : Form
         {
             if (_mouseDown)
             {
-                int canvasX = e.X;
-                int canvasY = e.Y;
-                var x = (int)(canvasX * _resolutionFactor);
-                var y = (int)(canvasY * _resolutionFactor);
-                _mandelbrotViewServiceProxy.MouseMove(x, y);
+                _mandelbrotViewServiceProxy.MouseMove(new MoveEvent(XLow(e.X), YLow(e.Y), WidthLow, HeightLow, WidthHigh, HeightHigh));
             }
         }
     }
@@ -131,15 +124,34 @@ public partial class MandelbrotForm : Form
     }
 
 
+    private int X(int x) => (int)(x * _resolutionFactor);
+
+    private int Y(int y) => (int)(y * _resolutionFactor);
+
     private int Width => (int)(canvasPanel.Width * _resolutionFactor);
 
     private int Height => (int)(canvasPanel.Height * _resolutionFactor);
+
+
+    private int XLow(int x) => (int)(x * 0.25);
+
+    private int YLow(int y) => (int)(y * 0.25);
+
+    private int WidthLow => (int)(canvasPanel.Width * 0.25);
+
+    private int HeightLow => (int)(canvasPanel.Height * 0.25);
+
+    private int WidthHigh => canvasPanel.Width;
+
+    private int HeightHigh => canvasPanel.Height;
 
 
     private void DrawMandelbrotResult(MandelbrotResult result)
     {
         if (result.HasErrors)
             return;
+
+        System.Diagnostics.Debug.WriteLine($"Draw");
 
         if (_imageBitmap == null || _imageBitmap.Width != result.ImageSize.Width || _imageBitmap.Height != result.ImageSize.Height)
         {

@@ -14,7 +14,7 @@ public interface IMandelbrotViewService
 
     void SetMouseStart(int x, int y);
 
-    MandelbrotResult MouseMove(int x, int y);
+    MandelbrotResult MouseMove(int x, int y, int width, int height);
 
     MandelbrotResult MouseWheel(bool zoomIn, int zoomCount, int x, int y);
 }

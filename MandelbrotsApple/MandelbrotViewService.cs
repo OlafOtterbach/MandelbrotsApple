@@ -58,7 +58,7 @@ public class MandelbrotViewService : IMandelbrotViewService
         _mouseY = y;
     }
 
-    public MandelbrotResult MouseMove(int x, int y)
+    public MandelbrotResult MouseMove(int x, int y, int width, int height)
     {
         var vx = x - _mouseX;
         var vy = y - _mouseY;
@@ -67,7 +67,7 @@ public class MandelbrotViewService : IMandelbrotViewService
 
         var mandelbrotMoveParameter = new MandelbrotMoveParameter(
             new ImageVector(vx, vy),
-            new ImageSize(_imageWidth, _imageHeight),
+            new ImageSize(width, height),
             _mandelbrotSize,
             _maxIterations);
 

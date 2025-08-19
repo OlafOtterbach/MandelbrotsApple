@@ -7,12 +7,14 @@ using System.Reactive.Subjects;
 public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposable
 {
     private readonly MandelbrotViewService _service = new MandelbrotViewService();
-    private readonly Subject<(int x, int y)> _mouseMoveSubject = new();
+    private readonly Subject<MoveEvent> _mouseMoveSubject = new();
     private readonly Subject<(bool zoomIn, int zoomCount, int x, int y)> _mouseWheelSubject = new();
     private readonly Subject<int> _maxIterationsSubject = new();
     private readonly Subject<(int resolutionPercentage, int width, int height)> _resolutionSubject = new();
     private readonly Subject<(int width, int height)> _resizeViewSubject = new();
+    private readonly Subject<MandelbrotResult> _drawSubjectHi = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
+    private readonly MandelbrotViewAgent _serviceAgent;
 
     private readonly IDisposable _mouseMoveSubscription;
     private readonly IDisposable _mouseWheelSubscription;
@@ -26,11 +28,31 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
     public MandelbrotViewServiceProxy()
     {
-        _mouseMoveSubscription = _mouseMoveSubject
-            .Sample(TimeSpan.FromMilliseconds(300))
-            .Select(pos => Observable.FromAsync(() => Task.Run(() => _service.MouseMove(pos.x, pos.y))))
-            .Concat()
-            .Subscribe(result => _drawSubject.OnNext(result));
+        _serviceAgent = new MandelbrotViewAgent(_service, _drawSubject);
+
+        _mouseMoveSubscription =
+
+            _mouseMoveSubject
+            .Scan(
+                seed: (new MoveEvent(0, 0, 0, 0,0,0), new MoveEvent(0, 0, 0, 0, 0, 0)),
+                (acc, curr) => (acc.Item2, curr)
+            )
+            .Skip(1)
+            .Select(pair =>
+            {
+                _serviceAgent.Move(new MoveCommand(pair.Item1.X, pair.Item1.Y, pair.Item1.WidthLow, pair.Item1.HeightLow));
+                return pair;
+            })
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .Subscribe(pair => _serviceAgent.Move(new MoveCommand(pair.Item2.X, pair.Item2.Y, pair.Item2.WidthHigh, pair.Item2.HeightHigh)));
+
+
+        //_mouseMoveSubject
+        //    .Throttle(TimeSpan.FromMilliseconds(300))
+        //    .Select(pos => Observable.FromAsync(() => Task.Run(() =>
+        //        _service.MouseMove(pos.x, pos.y /* High-Res */))))
+        //    .Merge()
+        //    .Subscribe(result => _drawSubjectHi.OnNext(result));
 
         _mouseWheelSubscription = _mouseWheelSubject
             .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))
@@ -85,10 +107,10 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
         => _maxIterationsSubject.OnNext(iterationPercentage);
 
     public void SetMouseStart(int x, int y)
-        => _service.SetMouseStart(x, y);
+        => _serviceAgent.Start(new StartCommand(x, y));
 
-    public void MouseMove(int x, int y)
-        => _mouseMoveSubject.OnNext((x, y));
+    public void MouseMove(MoveEvent moveEvent)
+        => _mouseMoveSubject.OnNext(moveEvent);
 
     public void MouseWheel(bool zoomIn, int zoomCount, int x, int y)
         => _mouseWheelSubject.OnNext((zoomIn, zoomCount, x, y));
