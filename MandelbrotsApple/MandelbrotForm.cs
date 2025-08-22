@@ -41,8 +41,8 @@ public partial class MandelbrotForm : Form
 
     private void On_MandelbrotForm_Resize(object? sender, EventArgs e)
     {
-        int width = Width;
-        int height = Height;
+        int width = WidthHigh;
+        int height = HeightHigh;
         if (width > 0 && height > 0)
         {
             _mandelbrotViewServiceProxy.ResizeView(width, height);
@@ -54,12 +54,11 @@ public partial class MandelbrotForm : Form
     {
         if (e.Button == MouseButtons.Left)
         {
-            int canvasX = e.X;
-            int canvasY = e.Y;
-            var x = XLow(e.X);// (int)(canvasX * _resolutionFactor);
-            var y = YLow(e.Y);// (int)(canvasY * _resolutionFactor);
+            var x = XLow(e.X);
+            var y = YLow(e.Y);
             _mandelbrotViewServiceProxy.SetMouseStart(x, y);
             _mouseDown = true;
+            _mandelbrotViewServiceProxy.Reset();
         }
     }
 
@@ -79,6 +78,8 @@ public partial class MandelbrotForm : Form
         {
             if (_mouseDown)
             {
+                System.Diagnostics.Debug.WriteLine($"on move ({e.X}, {XLow(e.X)})");
+
                 _mandelbrotViewServiceProxy.MouseMove(new MoveEvent(XLow(e.X), YLow(e.Y), WidthLow, HeightLow, WidthHigh, HeightHigh));
             }
         }
@@ -150,8 +151,6 @@ public partial class MandelbrotForm : Form
     {
         if (result.HasErrors)
             return;
-
-        System.Diagnostics.Debug.WriteLine($"Draw");
 
         if (_imageBitmap == null || _imageBitmap.Width != result.ImageSize.Width || _imageBitmap.Height != result.ImageSize.Height)
         {

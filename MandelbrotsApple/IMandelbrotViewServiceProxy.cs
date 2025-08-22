@@ -14,6 +14,8 @@ public interface IMandelbrotViewServiceProxy
 
     void SetMaxIterations(int iterationPercentage);
 
+    void Reset();
+
     void SetMouseStart(int x, int y);
 
     void MouseMove(MoveEvent moveEvent);

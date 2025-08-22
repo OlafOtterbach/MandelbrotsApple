@@ -10,9 +10,13 @@ public class MandelbrotViewAgent
 
     private class Message
     {
+        public static Message CreateResize(ResizeCommand resizeCommand) => new Message { Resize = resizeCommand };
+
         public static Message CreateStart(StartCommand startCommand) => new Message { Start = startCommand };
 
         public static Message CreateMove(MoveCommand moveCommand) => new Message { Move = moveCommand };
+
+        public ResizeCommand? Resize { get; set; }
 
         public StartCommand? Start { get; set; }
 
@@ -27,7 +31,13 @@ public class MandelbrotViewAgent
 
         _actionBlock = new ActionBlock<Message>(message =>
         {
-            if(message.Start.HasValue)
+            if(message.Resize.HasValue)
+            {
+                var resizeResult = _service.ResizeView(message.Resize.Value.Width, message.Resize.Value.Height);
+                draw.OnNext(resizeResult);
+            }
+
+            if (message.Start.HasValue)
             {
                 _service.SetMouseStart(message.Start.Value.X, message.Start.Value.Y);
             }
@@ -38,6 +48,11 @@ public class MandelbrotViewAgent
                 draw.OnNext(moveResult);
             }
         }, new ExecutionDataflowBlockOptions() { BoundedCapacity = -1 });
+    }
+
+    public void Resize(ResizeCommand resizeCommand)
+    {
+        _actionBlock.Post(Message.CreateResize(resizeCommand));
     }
 
     public void Start(StartCommand startCommand)

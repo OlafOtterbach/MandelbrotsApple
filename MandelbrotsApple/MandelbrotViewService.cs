@@ -1,6 +1,7 @@
 ﻿namespace MandelbrotsApple;
 
 using MandelbrotsApple.Mandelbrot;
+using static LaYumba.Functional.Either;
 using static MandelbrotsApple.Mandelbrot.View;
 
 public class MandelbrotViewService : IMandelbrotViewService
@@ -25,6 +26,7 @@ public class MandelbrotViewService : IMandelbrotViewService
 
     public MandelbrotResult ResizeView(int width, int height)
     {
+        System.Diagnostics.Debug.WriteLine($"resize ({width}, {height})");
         _imageWidth = width;
         _imageHeight = height;
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), _mandelbrotSize, _maxIterations);
@@ -54,12 +56,15 @@ public class MandelbrotViewService : IMandelbrotViewService
 
     public void SetMouseStart(int x, int y)
     {
+        System.Diagnostics.Debug.WriteLine($"start ({x}, {y})");
         _mouseX = x;
         _mouseY = y;
     }
 
     public MandelbrotResult MouseMove(int x, int y, int width, int height)
     {
+//        System.Diagnostics.Debug.WriteLine($"move ({x}, {y}) - ({_mouseX}, {_mouseY}) | {width}, {height})");
+
         var vx = x - _mouseX;
         var vy = y - _mouseY;
         _mouseX = x;
