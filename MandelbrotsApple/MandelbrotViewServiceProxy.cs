@@ -1,17 +1,15 @@
 ﻿namespace MandelbrotsApple;
 
 using MandelbrotsApple.Mandelbrot;
-using Microsoft.VisualBasic.Devices;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using static LaYumba.Functional.Either;
 
 public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposable
 {
     private readonly MandelbrotViewService _service = new MandelbrotViewService();
     private readonly Subject<MoveEvent> _mouseMoveSubject = new();
-    private readonly Subject<(bool zoomIn, int zoomCount, int x, int y)> _mouseWheelSubject = new();
+    private readonly Subject<WheelEvent> _mouseWheelSubject = new();
     private readonly Subject<int> _maxIterationsSubject = new();
     private readonly Subject<(int resolutionPercentage, int width, int height)> _resolutionSubject = new();
     private readonly Subject<(int width, int height)> _resizeViewSubject = new();
@@ -54,24 +52,14 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Subscribe();
 
         _mouseWheelSubscription = _mouseWheelSubject
-                .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))
-                .Where(buffer => buffer.Count > 0)
-                .Select(buffer =>
+                .Select(wheel =>
                 {
-                    int sum = 0;
-                    int x = buffer.First().x;
-                    int y = buffer.First().y;
-                    foreach (var evt in buffer)
-                    {
-                        sum += evt.zoomIn ? evt.zoomCount : -evt.zoomCount;
-                    }
-                    bool zoomIn = sum >= 0;
-                    int zoomCount = Math.Abs(sum);
-                    return (zoomIn, zoomCount, x, y);
+                    _serviceAgent.Wheel(new WheelCommand(wheel.ZoomIn, wheel.ZoomCount, wheel.X, wheel.Y, wheel.WidthLow, wheel.HeightLow));
+                    return wheel;
                 })
-                .Select(args => Observable.FromAsync(() => Task.Run(() => _service.MouseWheel(args.zoomIn, args.zoomCount, args.x, args.y))))
-                .Concat()
-                .Subscribe(result => _drawSubject.OnNext(result));
+                .Throttle(TimeSpan.FromMilliseconds(300))
+                .Do(wheel => _serviceAgent.Resize(new ResizeCommand(wheel.WidthHigh, wheel.HeightHigh)))
+                .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Throttle(TimeSpan.FromMilliseconds(500))
@@ -110,8 +98,8 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     public void MouseMove(MoveEvent moveEvent)
         => _mouseMoveSubject.OnNext(moveEvent);
 
-    public void MouseWheel(bool zoomIn, int zoomCount, int x, int y)
-        => _mouseWheelSubject.OnNext((zoomIn, zoomCount, x, y));
+    public void MouseWheel(WheelEvent wheelEvent)
+        => _mouseWheelSubject.OnNext(wheelEvent);
 
     public void Dispose()
     {

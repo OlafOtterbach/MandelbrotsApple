@@ -61,13 +61,13 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public MandelbrotResult MouseWheel(bool zoomIn, int zoomCount, int x, int y)
+    public MandelbrotResult MouseWheel(bool zoomIn, int zoomCount, int x, int y, int width, int height)
     {
         var mandelbrotZoomParameter = new MandelbrotZoomParameter(
             new ImagePosition(x, y),
             zoomIn,
             zoomCount,
-            new ImageSize(_imageWidth, _imageHeight),
+            new ImageSize(width, height),
             _mandelbrotSize,
             _maxIterations);
 

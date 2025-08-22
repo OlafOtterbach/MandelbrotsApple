@@ -36,7 +36,7 @@ public partial class MandelbrotForm : Form
 
     private void On_MandelbrotForm_Load(object? sender, EventArgs e)
     {
-        var result = _mandelbrotViewServiceProxy.InitialView(Width, Height);
+        var result = _mandelbrotViewServiceProxy.InitialView(WidthHigh, HeightHigh);
         DrawMandelbrotResult(result);
     }
 
@@ -98,11 +98,9 @@ public partial class MandelbrotForm : Form
     {
         int delta = e.Delta;
         int wheelClicks = Math.Abs(delta / 120);
-        int canvasX = e.X;
-        int canvasY = e.Y;
-        var x = (int)(canvasX * _resolutionFactor);
-        var y = (int)(canvasY * _resolutionFactor);
-        _mandelbrotViewServiceProxy.MouseWheel(delta < 0, wheelClicks, x, y);
+        var x = XLow(e.X);
+        var y = YLow(e.Y);
+        _mandelbrotViewServiceProxy.MouseWheel(new WheelEvent(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
     }
 
 
@@ -133,26 +131,19 @@ public partial class MandelbrotForm : Form
     }
 
 
-    private int X(int x) => (int)(x * _resolutionFactor);
+    private int XLow(int x) => (int)(x * LowFactor);
 
-    private int Y(int y) => (int)(y * _resolutionFactor);
+    private int YLow(int y) => (int)(y * LowFactor);
 
-    private int Width => (int)(canvasPanel.Width * _resolutionFactor);
+    private int WidthLow => (int)(canvasPanel.Width * LowFactor);
 
-    private int Height => (int)(canvasPanel.Height * _resolutionFactor);
-
-
-    private int XLow(int x) => (int)(x * 0.25);
-
-    private int YLow(int y) => (int)(y * 0.25);
-
-    private int WidthLow => (int)(canvasPanel.Width * 0.25);
-
-    private int HeightLow => (int)(canvasPanel.Height * 0.25);
+    private int HeightLow => (int)(canvasPanel.Height * LowFactor);
 
     private int WidthHigh => canvasPanel.Width;
 
     private int HeightHigh => canvasPanel.Height;
+
+    private double LowFactor => 640.0 / Math.Max(canvasPanel.Width, canvasPanel.Height);
 
 
     private void DrawMandelbrotResult(MandelbrotResult result)

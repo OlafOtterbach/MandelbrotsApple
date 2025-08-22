@@ -18,5 +18,5 @@ public interface IMandelbrotViewServiceProxy
 
     void MouseMove(MoveEvent moveEvent);
 
-    void MouseWheel(bool zoomIn, int zoomCount, int x, int y);
+    void MouseWheel(WheelEvent wheelEvent);
 }

@@ -14,5 +14,5 @@ public interface IMandelbrotViewService
 
     MandelbrotResult MouseMove(int x, int y, int width, int height);
 
-    MandelbrotResult MouseWheel(bool zoomIn, int zoomCount, int x, int y);
+    MandelbrotResult MouseWheel(bool zoomIn, int zoomCount, int x, int y, int width, int height);
 }
