@@ -1,7 +1,6 @@
 ﻿namespace MandelbrotsApple;
 
 using MandelbrotsApple.Mandelbrot;
-using static LaYumba.Functional.Either;
 using static MandelbrotsApple.Mandelbrot.View;
 
 public class MandelbrotViewService : IMandelbrotViewService
@@ -10,10 +9,6 @@ public class MandelbrotViewService : IMandelbrotViewService
     private int _imageWidth = 256; // Default width
     private int _imageHeight = 256; // Default height
     private MandelbrotSize _mandelbrotSize = MandelbrotSize.Empty;
-
-    private int _mouseX = 0;
-    private int _mouseY = 0;
-
 
     public MandelbrotResult InitialView(int width, int height)
     {
@@ -26,7 +21,6 @@ public class MandelbrotViewService : IMandelbrotViewService
 
     public MandelbrotResult ResizeView(int width, int height)
     {
-        System.Diagnostics.Debug.WriteLine($"resize ({width}, {height})");
         _imageWidth = width;
         _imageHeight = height;
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), _mandelbrotSize, _maxIterations);
@@ -54,22 +48,8 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public void SetMouseStart(int x, int y)
+    public MandelbrotResult MouseMove(int vx, int vy, int width, int height)
     {
-        System.Diagnostics.Debug.WriteLine($"start ({x}, {y})");
-        _mouseX = x;
-        _mouseY = y;
-    }
-
-    public MandelbrotResult MouseMove(int x, int y, int width, int height)
-    {
-//        System.Diagnostics.Debug.WriteLine($"move ({x}, {y}) - ({_mouseX}, {_mouseY}) | {width}, {height})");
-
-        var vx = x - _mouseX;
-        var vy = y - _mouseY;
-        _mouseX = x;
-        _mouseY = y;
-
         var mandelbrotMoveParameter = new MandelbrotMoveParameter(
             new ImageVector(vx, vy),
             new ImageSize(width, height),

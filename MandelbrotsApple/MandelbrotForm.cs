@@ -12,6 +12,8 @@ public partial class MandelbrotForm : Form
     private double _resolutionFactor = 1.0;
     private Bitmap? _imageBitmap;
     private bool _mouseDown = false;
+    private int _mouseX = 0;
+    private int _mouseY = 0;
 
     public MandelbrotForm()
     {
@@ -54,9 +56,8 @@ public partial class MandelbrotForm : Form
     {
         if (e.Button == MouseButtons.Left)
         {
-            var x = XLow(e.X);
-            var y = YLow(e.Y);
-            _mandelbrotViewServiceProxy.SetMouseStart(x, y);
+            _mouseX = XLow(e.X);
+            _mouseY = YLow(e.Y);
             _mouseDown = true;
             _mandelbrotViewServiceProxy.Reset();
         }
@@ -78,9 +79,16 @@ public partial class MandelbrotForm : Form
         {
             if (_mouseDown)
             {
-                System.Diagnostics.Debug.WriteLine($"on move ({e.X}, {XLow(e.X)})");
-
-                _mandelbrotViewServiceProxy.MouseMove(new MoveEvent(XLow(e.X), YLow(e.Y), WidthLow, HeightLow, WidthHigh, HeightHigh));
+                var endX = XLow(e.X);
+                var y = YLow(e.Y);
+                if (endX != _mouseX || y != _mouseY)
+                {
+                    var vx = endX - _mouseX;
+                    var vy = y - _mouseY;
+                    _mouseX = endX;
+                    _mouseY = y;
+                    _mandelbrotViewServiceProxy.MouseMove(new MoveEvent(vx, vy, endX, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+                }
             }
         }
     }

@@ -39,17 +39,17 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .SelectMany(window =>
                 window
                 .Scan(
-                    seed: (new MoveEvent(0, 0, 0, 0, 0, 0), new MoveEvent(0, 0, 0, 0, 0, 0)),
+                    seed: (new MoveEvent(0, 0, 0, 0, 0, 0, 0, 0), new MoveEvent(0, 0, 0, 0, 0, 0, 0, 0)),
                     (acc, curr) => (acc.Item2, curr)
                 )
                 .Skip(1)
                 .Select(pair =>
                 {
-                    _serviceAgent.Move(new MoveCommand(pair.Item1.X, pair.Item1.Y, pair.Item1.WidthLow, pair.Item1.HeightLow));
+                    _serviceAgent.Move(new MoveCommand(pair.Item1.Vx, pair.Item1.Vy, pair.Item1.WidthLow, pair.Item1.HeightLow));
                     return pair;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(pair => _serviceAgent.Move(new MoveCommand(pair.Item2.X, pair.Item2.Y, pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
+                .Do(pair => _serviceAgent.Resize(new ResizeCommand(pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
             )
             .Subscribe();
 
@@ -106,9 +106,6 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
     public void SetMaxIterations(int iterationPercentage)
         => _maxIterationsSubject.OnNext(iterationPercentage);
-
-    public void SetMouseStart(int x, int y)
-        => _serviceAgent.Start(new StartCommand(x, y));
 
     public void MouseMove(MoveEvent moveEvent)
         => _mouseMoveSubject.OnNext(moveEvent);
