@@ -9,7 +9,6 @@ using System.Windows.Forms;
 public partial class MandelbrotForm : Form
 {
     private IMandelbrotViewServiceProxy _mandelbrotViewServiceProxy = new MandelbrotViewServiceProxy();
-    private double _resolutionFactor = 1.0;
     private Bitmap? _imageBitmap;
     private bool _mouseDown = false;
     private int _mouseX = 0;
@@ -103,31 +102,10 @@ public partial class MandelbrotForm : Form
         _mandelbrotViewServiceProxy.MouseWheel(new WheelEvent(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
     }
 
-
-
-    private void On_SliderResolution_Scroll(object sender, EventArgs e)
-    {
-        var value = sliderResolution.Value;
-        _resolutionFactor = GetResolutionFactor(value);
-        int width = (int)(canvasPanel.Width * _resolutionFactor);
-        int height = (int)(canvasPanel.Height * _resolutionFactor);
-        _mandelbrotViewServiceProxy.SetResolution(value, width, height);
-    }
-
-
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
         _mandelbrotViewServiceProxy.SetMaxIterations(value);
-    }
-
-
-
-
-    private static double GetResolutionFactor(int percentage)
-    {
-        double resolutionFactor = (percentage * 0.80 + 20) / 100;
-        return resolutionFactor;
     }
 
 

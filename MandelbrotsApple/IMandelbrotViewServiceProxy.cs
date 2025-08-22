@@ -10,8 +10,6 @@ public interface IMandelbrotViewServiceProxy
 
     void ResizeView(int width, int height);
 
-    void SetResolution(int resolutionPercentage, int width, int height);
-
     void SetMaxIterations(int iterationPercentage);
 
     void Reset();

@@ -11,7 +11,6 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     private readonly Subject<MoveEvent> _mouseMoveSubject = new();
     private readonly Subject<WheelEvent> _mouseWheelSubject = new();
     private readonly Subject<int> _maxIterationsSubject = new();
-    private readonly Subject<(int resolutionPercentage, int width, int height)> _resolutionSubject = new();
     private readonly Subject<(int width, int height)> _resizeViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
     private readonly Subject<Unit> _mouseResetSubject = new();
@@ -20,7 +19,6 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     private readonly IDisposable _mouseMoveSubscription;
     private readonly IDisposable _mouseWheelSubscription;
     private readonly IDisposable _maxIterationsSubscription;
-    private readonly IDisposable _resolutionSubscription;
     private readonly IDisposable _resizeViewSubscription;
 
     private bool _disposed;
@@ -67,12 +65,6 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Concat()
             .Subscribe(result => _drawSubject.OnNext(result));
 
-        _resolutionSubscription = _resolutionSubject
-            .Throttle(TimeSpan.FromMilliseconds(500))
-            .Select(args => Observable.FromAsync(() => Task.Run(() => _service.SetResolution(args.resolutionPercentage, args.width, args.height))))
-            .Concat()
-            .Subscribe(result => _drawSubject.OnNext(result));
-
         _resizeViewSubscription = _resizeViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
             .Subscribe(args => _serviceAgent.Resize(new ResizeCommand(args.width, args.height)));
@@ -89,9 +81,6 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     public void ResizeView(int width, int height)
         => _resizeViewSubject.OnNext((width, height));
 
-    public void SetResolution(int resolutionPercentage, int width, int height)
-        => _resolutionSubject.OnNext((resolutionPercentage, width, height));
-
     public void SetMaxIterations(int iterationPercentage)
         => _maxIterationsSubject.OnNext(iterationPercentage);
 
@@ -107,13 +96,11 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
         _mouseMoveSubscription.Dispose();
         _mouseWheelSubscription.Dispose();
         _maxIterationsSubscription.Dispose();
-        _resolutionSubscription.Dispose();
         _resizeViewSubscription.Dispose();
 
         _mouseMoveSubject.Dispose();
         _mouseWheelSubject.Dispose();
         _maxIterationsSubject.Dispose();
-        _resolutionSubject.Dispose();
         _resizeViewSubject.Dispose();
         _drawSubject.Dispose();
         _mouseResetSubject.Dispose();
