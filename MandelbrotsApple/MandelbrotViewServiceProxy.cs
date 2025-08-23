@@ -10,7 +10,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     private readonly MandelbrotViewService _service = new MandelbrotViewService();
     private readonly Subject<MoveEvent> _mouseMoveSubject = new();
     private readonly Subject<WheelEvent> _mouseWheelSubject = new();
-    private readonly Subject<int> _maxIterationsSubject = new();
+    private readonly Subject<IterationCommand> _maxIterationsSubject = new();
     private readonly Subject<(int width, int height)> _resizeViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
     private readonly Subject<Unit> _mouseResetSubject = new();
@@ -60,10 +60,8 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject
-            .Throttle(TimeSpan.FromMilliseconds(500))
-            .Select(iter => Observable.FromAsync(() => Task.Run(() => _service.SetMaxIterations(iter))))
-            .Concat()
-            .Subscribe(result => _drawSubject.OnNext(result));
+            .Sample(TimeSpan.FromMilliseconds(500))
+            .Subscribe(iter => _serviceAgent.Iterate(iter));
 
         _resizeViewSubscription = _resizeViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
@@ -81,8 +79,8 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     public void ResizeView(int width, int height)
         => _resizeViewSubject.OnNext((width, height));
 
-    public void SetMaxIterations(int iterationPercentage)
-        => _maxIterationsSubject.OnNext(iterationPercentage);
+    public void SetMaxIterations(IterationCommand iterationCommand)
+        => _maxIterationsSubject.OnNext(iterationCommand);
 
     public void MouseMove(MoveEvent moveEvent)
         => _mouseMoveSubject.OnNext(moveEvent);

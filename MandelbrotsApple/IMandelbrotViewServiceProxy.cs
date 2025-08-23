@@ -10,7 +10,7 @@ public interface IMandelbrotViewServiceProxy
 
     void ResizeView(int width, int height);
 
-    void SetMaxIterations(int iterationPercentage);
+    void SetMaxIterations(IterationCommand iterationCommand);
 
     void Reset();
 

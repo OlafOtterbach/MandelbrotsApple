@@ -10,11 +10,15 @@ public class MandelbrotViewAgent
 
     private class Message
     {
+        public static Message CreateIteration(IterationCommand iterationCommand) => new Message { Iteration = iterationCommand };
+
         public static Message CreateResize(ResizeCommand resizeCommand) => new Message { Resize = resizeCommand };
 
         public static Message CreateMove(MoveCommand moveCommand) => new Message { Move = moveCommand };
 
         public static Message CreateWheel(WheelCommand wheelCommand) => new Message { Wheel = wheelCommand };
+
+        public IterationCommand? Iteration { get; set; }
 
         public ResizeCommand? Resize { get; set; }
 
@@ -31,6 +35,12 @@ public class MandelbrotViewAgent
 
         _actionBlock = new ActionBlock<Message>(message =>
         {
+            if(message.Iteration != null)
+            {
+                var iterationResult = _service.SetMaxIterations(message.Iteration.Value.IterationPercentage, message.Iteration.Value.Width, message.Iteration.Value.Height);
+                draw.OnNext(iterationResult);
+            }
+
             if (message.Resize.HasValue)
             {
                 var resizeResult = _service.ResizeView(message.Resize.Value.Width, message.Resize.Value.Height);
@@ -49,6 +59,11 @@ public class MandelbrotViewAgent
                 draw.OnNext(wheelResult);
             }
         }, new ExecutionDataflowBlockOptions() { BoundedCapacity = -1 });
+    }
+
+    public void Iterate(IterationCommand iterationCommand)
+    {
+        _actionBlock.Post(Message.CreateIteration(iterationCommand));
     }
 
     public void Resize(ResizeCommand resizeCommand)

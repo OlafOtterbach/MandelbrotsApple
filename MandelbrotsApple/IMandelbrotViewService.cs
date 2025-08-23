@@ -8,7 +8,7 @@ public interface IMandelbrotViewService
 
     MandelbrotResult ResizeView(int width, int height);
 
-    MandelbrotResult SetMaxIterations(int iterationPercentage);
+    MandelbrotResult SetMaxIterations(int iterationPercentage, int width, int height);
 
     MandelbrotResult MouseMove(int x, int y, int width, int height);
 

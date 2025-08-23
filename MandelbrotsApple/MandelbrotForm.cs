@@ -105,7 +105,7 @@ public partial class MandelbrotForm : Form
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
-        _mandelbrotViewServiceProxy.SetMaxIterations(value);
+        _mandelbrotViewServiceProxy.SetMaxIterations(new IterationCommand(value, WidthHigh, HeightHigh));
     }
 
 

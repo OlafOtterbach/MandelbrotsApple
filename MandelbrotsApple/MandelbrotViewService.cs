@@ -29,10 +29,10 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public MandelbrotResult SetMaxIterations(int iterationPercentage)
+    public MandelbrotResult SetMaxIterations(int iterationPercentage, int width, int height)
     {
         _maxIterations = GetMaxIteration(iterationPercentage);
-        var mandelbrotParameter = new MandelbrotParameter(new ImageSize(_imageWidth, _imageHeight), _mandelbrotSize, _maxIterations);
+        var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), _mandelbrotSize, _maxIterations);
         var result = Refresh(mandelbrotParameter);
         _mandelbrotSize = result.MandelbrotSize;
         return result;
