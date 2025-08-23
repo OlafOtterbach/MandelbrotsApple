@@ -29,16 +29,6 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public MandelbrotResult SetResolution(int resolutionPercentage, int width, int height)
-    {
-        _imageWidth = width;
-        _imageHeight = height;
-        var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), _mandelbrotSize, _maxIterations);
-        var result = Refresh(mandelbrotParameter);
-        _mandelbrotSize = result.MandelbrotSize;
-        return result;
-    }
-
     public MandelbrotResult SetMaxIterations(int iterationPercentage)
     {
         _maxIterations = GetMaxIteration(iterationPercentage);
@@ -57,7 +47,12 @@ public class MandelbrotViewService : IMandelbrotViewService
             _maxIterations);
 
         var result = Move(mandelbrotMoveParameter);
-        _mandelbrotSize = result.MandelbrotSize;
+
+        if (!result.HasErrors)
+        {
+            _mandelbrotSize = result.MandelbrotSize;
+        }
+
         return result;
     }
 
@@ -72,7 +67,12 @@ public class MandelbrotViewService : IMandelbrotViewService
             _maxIterations);
 
         var result = Zoom(mandelbrotZoomParameter);
-        _mandelbrotSize = result.MandelbrotSize;
+        
+        if(!result.HasErrors)
+        {
+            _mandelbrotSize = result.MandelbrotSize;
+        }
+
         return result;
     }
 
