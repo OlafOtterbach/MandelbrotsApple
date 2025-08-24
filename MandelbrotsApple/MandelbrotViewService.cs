@@ -5,14 +5,10 @@ using static MandelbrotsApple.Mandelbrot.View;
 
 public class MandelbrotViewService : IMandelbrotViewService
 {
-    private int _maxIterations = 255; // Default max iterations for Mandelbrot calculation
-    private MandelbrotSize _mandelbrotSize = MandelbrotSize.Empty;
-
     public MandelbrotResult InitialView(int iterationPercentage, int width, int height)
     {
         var maxIterations = GetMaxIteration(iterationPercentage);
         var result = Initialize(new ImageSize(width, height), maxIterations);
-        _mandelbrotSize = result.MandelbrotSize;
         return result;
     }
 
@@ -20,7 +16,6 @@ public class MandelbrotViewService : IMandelbrotViewService
     {
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), state.Size, state.MaxIterations);
         var result = Refresh(mandelbrotParameter);
-        _mandelbrotSize = result.MandelbrotSize;
         return result;
     }
 
@@ -29,7 +24,6 @@ public class MandelbrotViewService : IMandelbrotViewService
         var maxIterations = GetMaxIteration(iterationPercentage);
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), mandelbrotSize, maxIterations);
         var result = Refresh(mandelbrotParameter);
-        _mandelbrotSize = result.MandelbrotSize;
         return result;
     }
 
@@ -42,11 +36,6 @@ public class MandelbrotViewService : IMandelbrotViewService
             state.MaxIterations);
 
         var result = Move(mandelbrotMoveParameter);
-
-        if (!result.HasErrors)
-        {
-            _mandelbrotSize = result.MandelbrotSize;
-        }
 
         return result;
     }
@@ -63,11 +52,6 @@ public class MandelbrotViewService : IMandelbrotViewService
 
         var result = Zoom(mandelbrotZoomParameter);
         
-        if(!result.HasErrors)
-        {
-            _mandelbrotSize = result.MandelbrotSize;
-        }
-
         return result;
     }
 
