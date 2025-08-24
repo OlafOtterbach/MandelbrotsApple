@@ -6,14 +6,10 @@ using static MandelbrotsApple.Mandelbrot.View;
 public class MandelbrotViewService : IMandelbrotViewService
 {
     private int _maxIterations = 255; // Default max iterations for Mandelbrot calculation
-    private int _imageWidth = 256; // Default width
-    private int _imageHeight = 256; // Default height
     private MandelbrotSize _mandelbrotSize = MandelbrotSize.Empty;
 
     public MandelbrotResult InitialView(int width, int height)
     {
-        _imageWidth = width;
-        _imageHeight = height;
         var result = Initialize(new ImageSize(width, height), _maxIterations);
         _mandelbrotSize = result.MandelbrotSize;
         return result;
@@ -21,8 +17,6 @@ public class MandelbrotViewService : IMandelbrotViewService
 
     public MandelbrotResult ResizeView(int width, int height)
     {
-        _imageWidth = width;
-        _imageHeight = height;
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), _mandelbrotSize, _maxIterations);
         var result = Refresh(mandelbrotParameter);
         _mandelbrotSize = result.MandelbrotSize;
