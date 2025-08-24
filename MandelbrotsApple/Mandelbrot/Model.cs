@@ -21,6 +21,19 @@ public readonly record struct MandelbrotSize(MandelbrotPosition Min, MandelbrotP
 
 
 
+public readonly record struct MandelbrotState(MandelbrotSize Size, int MaxIterations)
+{
+    public static MandelbrotState Empty => new MandelbrotState(MandelbrotSize.Empty, 255);
+}
+
+public static class MandelbrotStateExtensions
+{
+    public static MandelbrotState SetSize(this MandelbrotState state, MandelbrotSize size) =>
+        state with { Size = size };
+
+    public static MandelbrotState SetMaxIterations(this MandelbrotState state, int maxIterations) =>
+        state with { MaxIterations = maxIterations };
+}
 
 
 public readonly record struct MandelbrotParameter(ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);

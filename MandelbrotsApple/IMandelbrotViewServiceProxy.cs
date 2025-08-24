@@ -6,7 +6,7 @@ public interface IMandelbrotViewServiceProxy
 {
     IObservable<MandelbrotResult> DrawObservable { get; }
 
-    MandelbrotResult InitialView(int width, int height);
+    void Init(int IterationPercentage, int width, int height);
 
     void ResizeView(int width, int height);
 

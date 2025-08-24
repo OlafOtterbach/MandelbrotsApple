@@ -68,8 +68,8 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Subscribe(args => _serviceAgent.Resize(new ResizeCommand(args.width, args.height)));
     }
 
-    public MandelbrotResult InitialView(int width, int height)
-        => _service.InitialView(width, height);
+    public void Init(int IterationPercentage, int width, int height)
+        => _serviceAgent.Init(new Init(IterationPercentage, width, height));
 
     public void Reset()
     {

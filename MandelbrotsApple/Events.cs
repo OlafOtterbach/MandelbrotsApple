@@ -1,5 +1,7 @@
 ﻿namespace MandelbrotsApple;
 
+public record struct Init(int IterationPercentage, int Width, int Height);
+
 public record struct IterationCommand(int IterationPercentage, int Width, int Height);
 
 public record struct ResizeCommand(int Width, int Height);

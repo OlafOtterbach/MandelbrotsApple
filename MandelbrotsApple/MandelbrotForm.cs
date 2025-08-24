@@ -35,8 +35,13 @@ public partial class MandelbrotForm : Form
 
     private void On_MandelbrotForm_Load(object? sender, EventArgs e)
     {
-        var result = _mandelbrotViewServiceProxy.InitialView(WidthHigh, HeightHigh);
-        DrawMandelbrotResult(result);
+        int width = WidthHigh;
+        int height = HeightHigh;
+        if (width > 0 && height > 0)
+        {
+            var value = sliderIteration.Value;
+            _mandelbrotViewServiceProxy.Init(value, width, height);
+        }
     }
 
 
