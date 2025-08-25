@@ -8,10 +8,10 @@ using System.Reactive.Subjects;
 public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposable
 {
     private readonly MandelbrotViewService _service = new MandelbrotViewService();
-    private readonly Subject<MoveEvent> _mouseMoveSubject = new();
-    private readonly Subject<WheelEvent> _mouseWheelSubject = new();
-    private readonly Subject<IterationCommand> _maxIterationsSubject = new();
-    private readonly Subject<(int width, int height)> _resizeViewSubject = new();
+    private readonly Subject<MoveLowAndFinalHigh> _mouseMoveSubject = new();
+    private readonly Subject<ZoomLowAndHigh> _mouseWheelSubject = new();
+    private readonly Subject<MaxIteration> _maxIterationsSubject = new();
+    private readonly Subject<Resize> _resizeViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
     private readonly Subject<Unit> _mouseResetSubject = new();
     private readonly MandelbrotViewAgent _serviceAgent;
@@ -35,28 +35,28 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .SelectMany(window =>
                 window
                 .Scan(
-                    seed: (new MoveEvent(0, 0, 0, 0, 0, 0, 0, 0), new MoveEvent(0, 0, 0, 0, 0, 0, 0, 0)),
+                    seed: (new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0, 0, 0), new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0, 0, 0)),
                     (acc, curr) => (acc.Item2, curr)
                 )
                 .Skip(1)
                 .Select(pair =>
                 {
-                    _serviceAgent.Move(new MoveCommand(pair.Item1.Vx, pair.Item1.Vy, pair.Item1.WidthLow, pair.Item1.HeightLow));
+                    _serviceAgent.Move(new Move(pair.Item1.Vx, pair.Item1.Vy, pair.Item1.WidthLow, pair.Item1.HeightLow));
                     return pair;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(pair => _serviceAgent.Resize(new ResizeCommand(pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
+                .Do(pair => _serviceAgent.Resize(new Resize(pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
             )
             .Subscribe();
 
         _mouseWheelSubscription = _mouseWheelSubject
-                .Select(wheel =>
+                .Select(zoom =>
                 {
-                    _serviceAgent.Wheel(new WheelCommand(wheel.ZoomIn, wheel.ZoomCount, wheel.X, wheel.Y, wheel.WidthLow, wheel.HeightLow));
-                    return wheel;
+                    _serviceAgent.Zoom(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
+                    return zoom;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(wheel => _serviceAgent.Resize(new ResizeCommand(wheel.WidthHigh, wheel.HeightHigh)))
+                .Do(zoom => _serviceAgent.Resize(new Resize(zoom.WidthHigh, zoom.HeightHigh)))
                 .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject
@@ -65,28 +65,29 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
         _resizeViewSubscription = _resizeViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(args => _serviceAgent.Resize(new ResizeCommand(args.width, args.height)));
+            .Subscribe(resize => _serviceAgent.Resize(resize));
     }
 
-    public void Init(int IterationPercentage, int width, int height)
-        => _serviceAgent.Init(new Init(IterationPercentage, width, height));
+    public void Init(Init init)
+        => _serviceAgent.Init(init);
+
+    public void ResizeView(Resize resize)
+        => _resizeViewSubject.OnNext(resize);
+
+    public void MaxIterations(MaxIteration maxIteration)
+        => _maxIterationsSubject.OnNext(maxIteration);
+
+    public void Move(MoveLowAndFinalHigh move)
+        => _mouseMoveSubject.OnNext(move);
+
+    public void Zoom(ZoomLowAndHigh zoom)
+        => _mouseWheelSubject.OnNext(zoom);
 
     public void Reset()
     {
         _mouseResetSubject.OnNext(Unit.Default);
     }
 
-    public void ResizeView(int width, int height)
-        => _resizeViewSubject.OnNext((width, height));
-
-    public void SetMaxIterations(IterationCommand iterationCommand)
-        => _maxIterationsSubject.OnNext(iterationCommand);
-
-    public void MouseMove(MoveEvent moveEvent)
-        => _mouseMoveSubject.OnNext(moveEvent);
-
-    public void MouseWheel(WheelEvent wheelEvent)
-        => _mouseWheelSubject.OnNext(wheelEvent);
 
     public void Dispose()
     {

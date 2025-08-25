@@ -2,14 +2,14 @@
 
 public record struct Init(int IterationPercentage, int Width, int Height);
 
-public record struct IterationCommand(int IterationPercentage, int Width, int Height);
+public record struct MaxIteration(int IterationPercentage, int Width, int Height);
 
-public record struct ResizeCommand(int Width, int Height);
+public record struct Resize(int Width, int Height);
 
-public record struct MoveEvent(int Vx, int Vy, int EndX, int EndY, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh);
+public record struct MoveLowAndFinalHigh(int Vx, int Vy, int EndX, int EndY, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh);
 
-public record struct MoveCommand(int Vx, int Vy, int Width, int Height);
+public record struct Move(int Vx, int Vy, int Width, int Height);
 
-public record struct WheelEvent(bool ZoomIn, int ZoomCount, int X, int Y, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh);
+public record struct ZoomLowAndHigh(bool ZoomIn, int ZoomCount, int X, int Y, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh);
 
-public record struct WheelCommand(bool ZoomIn, int ZoomCount, int X, int Y, int Width, int Height);
+public record struct Zoom(bool ZoomIn, int ZoomCount, int X, int Y, int Width, int Height);

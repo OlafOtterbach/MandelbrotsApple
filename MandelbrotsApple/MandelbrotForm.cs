@@ -40,7 +40,7 @@ public partial class MandelbrotForm : Form
         if (width > 0 && height > 0)
         {
             var value = sliderIteration.Value;
-            _mandelbrotViewServiceProxy.Init(value, width, height);
+            _mandelbrotViewServiceProxy.Init(new Init(value, width, height));
         }
     }
 
@@ -51,7 +51,7 @@ public partial class MandelbrotForm : Form
         int height = HeightHigh;
         if (width > 0 && height > 0)
         {
-            _mandelbrotViewServiceProxy.ResizeView(width, height);
+            _mandelbrotViewServiceProxy.ResizeView(new Resize(width, height));
         }
     }
 
@@ -91,7 +91,7 @@ public partial class MandelbrotForm : Form
                     var vy = y - _mouseY;
                     _mouseX = endX;
                     _mouseY = y;
-                    _mandelbrotViewServiceProxy.MouseMove(new MoveEvent(vx, vy, endX, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(vx, vy, endX, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
                 }
             }
         }
@@ -104,13 +104,13 @@ public partial class MandelbrotForm : Form
         int wheelClicks = Math.Abs(delta / 120);
         var x = XLow(e.X);
         var y = YLow(e.Y);
-        _mandelbrotViewServiceProxy.MouseWheel(new WheelEvent(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
     }
 
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
-        _mandelbrotViewServiceProxy.SetMaxIterations(new IterationCommand(value, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, WidthHigh, HeightHigh));
     }
 
 

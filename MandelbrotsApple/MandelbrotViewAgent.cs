@@ -1,8 +1,8 @@
-﻿using MandelbrotsApple.Mandelbrot;
+﻿namespace MandelbrotsApple;
+
+using MandelbrotsApple.Mandelbrot;
 using System.Reactive.Subjects;
 using System.Threading.Tasks.Dataflow;
-
-namespace MandelbrotsApple;
 
 public class MandelbrotViewAgent
 {
@@ -10,23 +10,23 @@ public class MandelbrotViewAgent
     {
         public static Message CreateInit(Init init) => new Message { Init = new Init(init.IterationPercentage, init.Width, init.Height) };
 
-        public static Message CreateIteration(IterationCommand iterationCommand) => new Message { Iteration = iterationCommand };
+        public static Message CreateMaxIteration(MaxIteration maxIteration) => new Message { MaxIteration = maxIteration };
 
-        public static Message CreateResize(ResizeCommand resizeCommand) => new Message { Resize = resizeCommand };
+        public static Message CreateResize(Resize resize) => new Message { Resize = resize };
 
-        public static Message CreateMove(MoveCommand moveCommand) => new Message { Move = moveCommand };
+        public static Message CreateMove(Move move) => new Message { Move = move };
 
-        public static Message CreateWheel(WheelCommand wheelCommand) => new Message { Wheel = wheelCommand };
+        public static Message CreateZoom(Zoom zoom) => new Message { Zoom = zoom };
 
         public Init? Init { get; set; }
 
-        public IterationCommand? Iteration { get; set; }
+        public MaxIteration? MaxIteration { get; set; }
 
-        public ResizeCommand? Resize { get; set; }
+        public Resize? Resize { get; set; }
 
-        public MoveCommand? Move { get; set; }
+        public Move? Move { get; set; }
 
-        public WheelCommand? Wheel { get; set; }
+        public Zoom? Zoom { get; set; }
     }
 
     private readonly ActionBlock<Message> _actionBlock;
@@ -43,7 +43,7 @@ public class MandelbrotViewAgent
         {
             if(message.Init != null)
             {
-                var initResult = _service.InitialView(message.Init.Value.IterationPercentage, message.Init.Value.Width, message.Init.Value.Height);
+                var initResult = _service.Init(message.Init.Value.IterationPercentage, message.Init.Value.Width, message.Init.Value.Height);
                 if(!initResult.HasErrors)
                 {
                     _state = new MandelbrotState(initResult.MandelbrotSize, initResult.MaxIterations);
@@ -52,9 +52,9 @@ public class MandelbrotViewAgent
                 draw.OnNext(initResult);
             }
 
-            if (message.Iteration != null)
+            if (message.MaxIteration != null)
             {
-                var iterationResult = _service.SetMaxIterations(_state.Size, message.Iteration.Value.IterationPercentage, message.Iteration.Value.Width, message.Iteration.Value.Height);
+                var iterationResult = _service.MaxIterations(_state.Size, message.MaxIteration.Value.IterationPercentage, message.MaxIteration.Value.Width, message.MaxIteration.Value.Height);
                 if (!iterationResult.HasErrors)
                 {
                     _state = new MandelbrotState(iterationResult.MandelbrotSize, iterationResult.MaxIterations);
@@ -65,7 +65,7 @@ public class MandelbrotViewAgent
 
             if (message.Resize.HasValue)
             {
-                var resizeResult = _service.ResizeView(_state, message.Resize.Value.Width, message.Resize.Value.Height);
+                var resizeResult = _service.Resize(_state, message.Resize.Value.Width, message.Resize.Value.Height);
                 if (!resizeResult.HasErrors)
                 {
                     _state = new MandelbrotState(resizeResult.MandelbrotSize, resizeResult.MaxIterations);
@@ -76,7 +76,7 @@ public class MandelbrotViewAgent
 
             if (message.Move.HasValue)
             {
-                var moveResult = _service.MouseMove(_state, message.Move.Value.Vx, message.Move.Value.Vy, message.Move.Value.Width, message.Move.Value.Height);
+                var moveResult = _service.Move(_state, message.Move.Value.Vx, message.Move.Value.Vy, message.Move.Value.Width, message.Move.Value.Height);
                 if (!moveResult.HasErrors)
                 {
                     _state = new MandelbrotState(moveResult.MandelbrotSize, moveResult.MaxIterations);
@@ -85,15 +85,15 @@ public class MandelbrotViewAgent
                 draw.OnNext(moveResult);
             }
 
-            if (message.Wheel.HasValue)
+            if (message.Zoom.HasValue)
             {
-                var wheelResult = _service.MouseWheel(_state, message.Wheel.Value.ZoomIn, message.Wheel.Value.ZoomCount, message.Wheel.Value.X, message.Wheel.Value.Y, message.Wheel.Value.Width, message.Wheel.Value.Height);
-                if (!wheelResult.HasErrors)
+                var zoomResult = _service.Zoom(_state, message.Zoom.Value.ZoomIn, message.Zoom.Value.ZoomCount, message.Zoom.Value.X, message.Zoom.Value.Y, message.Zoom.Value.Width, message.Zoom.Value.Height);
+                if (!zoomResult.HasErrors)
                 {
-                    _state = new MandelbrotState(wheelResult.MandelbrotSize, wheelResult.MaxIterations);
+                    _state = new MandelbrotState(zoomResult.MandelbrotSize, zoomResult.MaxIterations);
                 }
 
-                draw.OnNext(wheelResult);
+                draw.OnNext(zoomResult);
             }
         }, new ExecutionDataflowBlockOptions() { BoundedCapacity = -1 });
     }
@@ -103,24 +103,23 @@ public class MandelbrotViewAgent
         _actionBlock.Post(Message.CreateInit(init));
     }
 
-    public void Iterate(IterationCommand iterationCommand)
+    public void Iterate(MaxIteration maxIteration)
     {
-        _actionBlock.Post(Message.CreateIteration(iterationCommand));
+        _actionBlock.Post(Message.CreateMaxIteration(maxIteration));
     }
 
-    public void Resize(ResizeCommand resizeCommand)
+    public void Resize(Resize resize)
     {
-        _actionBlock.Post(Message.CreateResize(resizeCommand));
+        _actionBlock.Post(Message.CreateResize(resize));
     }
 
-    public void Move(MoveCommand moveCommand)
+    public void Move(Move move)
     {
-        _actionBlock.Post(Message.CreateMove(moveCommand));
+        _actionBlock.Post(Message.CreateMove(move));
     }
 
-    public void Wheel(WheelCommand wheelCommand)
+    public void Zoom(Zoom zoom)
     {
-        _actionBlock.Post(Message.CreateWheel(wheelCommand));
+        _actionBlock.Post(Message.CreateZoom(zoom));
     }
 }
-

@@ -6,15 +6,15 @@ public interface IMandelbrotViewServiceProxy
 {
     IObservable<MandelbrotResult> DrawObservable { get; }
 
-    void Init(int IterationPercentage, int width, int height);
+    void Init(Init init);
 
-    void ResizeView(int width, int height);
+    void ResizeView(Resize resize);
 
-    void SetMaxIterations(IterationCommand iterationCommand);
+    void MaxIterations(MaxIteration iteration);
+
+    void Move(MoveLowAndFinalHigh move);
+
+    void Zoom(ZoomLowAndHigh zoom);
 
     void Reset();
-
-    void MouseMove(MoveEvent moveEvent);
-
-    void MouseWheel(WheelEvent wheelEvent);
 }
