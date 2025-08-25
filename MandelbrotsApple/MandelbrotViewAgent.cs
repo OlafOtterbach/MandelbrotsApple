@@ -1,32 +1,43 @@
 ﻿namespace MandelbrotsApple;
 
+using LaYumba.Functional;
 using MandelbrotsApple.Mandelbrot;
 using System.Reactive.Subjects;
 using System.Threading.Tasks.Dataflow;
+using static LaYumba.Functional.F;
 
 public class MandelbrotViewAgent
 {
     private class Message
     {
-        public static Message CreateInit(Init init) => new Message { Init = new Init(init.IterationPercentage, init.Width, init.Height) };
+        public Message()
+        {
+            Init = None;
+            MaxIteration = None;
+            Resize = None;
+            Move = None;
+            Zoom = None;
+        }
 
-        public static Message CreateMaxIteration(MaxIteration maxIteration) => new Message { MaxIteration = maxIteration };
+        public static Message CreateInit(Init init) => new Message { Init = Some(init) };
 
-        public static Message CreateResize(Resize resize) => new Message { Resize = resize };
+        public static Message CreateMaxIteration(MaxIteration maxIteration) => new Message { MaxIteration = Some(maxIteration) };
 
-        public static Message CreateMove(Move move) => new Message { Move = move };
+        public static Message CreateResize(Resize resize) => new Message { Resize = Some(resize) };
 
-        public static Message CreateZoom(Zoom zoom) => new Message { Zoom = zoom };
+        public static Message CreateMove(Move move) => new Message { Move = Some(move) };
 
-        public Init? Init { get; set; }
+        public static Message CreateZoom(Zoom zoom) => new Message { Zoom = Some(zoom) };
 
-        public MaxIteration? MaxIteration { get; set; }
+        public Option<Init> Init { get; set; }
 
-        public Resize? Resize { get; set; }
+        public Option<MaxIteration> MaxIteration { get; private set; }
 
-        public Move? Move { get; set; }
+        public Option<Resize> Resize { get; private set; }
 
-        public Zoom? Zoom { get; set; }
+        public Option<Move> Move { get; private set; }
+
+        public Option<Zoom> Zoom { get; private set; }
     }
 
     private readonly ActionBlock<Message> _actionBlock;
@@ -41,60 +52,66 @@ public class MandelbrotViewAgent
 
         _actionBlock = new ActionBlock<Message>(message =>
         {
-            if(message.Init != null)
-            {
-                var initResult = _service.Init(message.Init.Value.IterationPercentage, message.Init.Value.Width, message.Init.Value.Height);
-                if(!initResult.HasErrors)
+            message.Init.Match(
+                Some: init =>
                 {
-                    _state = new MandelbrotState(initResult.MandelbrotSize, initResult.MaxIterations);
-                }
+                    var initResult = _service.Init(init.IterationPercentage, init.Width, init.Height);
+                    if (!initResult.HasErrors)
+                    {
+                        _state = new MandelbrotState(initResult.MandelbrotSize, initResult.MaxIterations);
+                        draw.OnNext(initResult);
+                    }
+                },
+                None: () => { });
 
-                draw.OnNext(initResult);
-            }
-
-            if (message.MaxIteration != null)
-            {
-                var iterationResult = _service.MaxIterations(_state.Size, message.MaxIteration.Value.IterationPercentage, message.MaxIteration.Value.Width, message.MaxIteration.Value.Height);
-                if (!iterationResult.HasErrors)
+            message.MaxIteration.Match(
+                Some: maxIter =>
                 {
-                    _state = new MandelbrotState(iterationResult.MandelbrotSize, iterationResult.MaxIterations);
-                }
+                    var iterationResult = _service.MaxIterations(_state.Size, maxIter.IterationPercentage, maxIter.Width, maxIter.Height);
+                    if (!iterationResult.HasErrors)
+                    {
+                        _state = new MandelbrotState(iterationResult.MandelbrotSize, iterationResult.MaxIterations);
+                        draw.OnNext(iterationResult);
+                    }
+                },
+                None: () => { });
 
-                draw.OnNext(iterationResult);
-            }
-
-            if (message.Resize.HasValue)
-            {
-                var resizeResult = _service.Resize(_state, message.Resize.Value.Width, message.Resize.Value.Height);
-                if (!resizeResult.HasErrors)
+            message.Resize.Match(
+                Some: resize =>
                 {
-                    _state = new MandelbrotState(resizeResult.MandelbrotSize, resizeResult.MaxIterations);
-                }
+                    var resizeResult = _service.Resize(_state, resize.Width, resize.Height);
+                    if (!resizeResult.HasErrors)
+                    {
+                        _state = new MandelbrotState(resizeResult.MandelbrotSize, resizeResult.MaxIterations);
+                        draw.OnNext(resizeResult);
+                    }
+                },
+                None: () => { });
 
-                draw.OnNext(resizeResult);
-            }
-
-            if (message.Move.HasValue)
-            {
-                var moveResult = _service.Move(_state, message.Move.Value.Vx, message.Move.Value.Vy, message.Move.Value.Width, message.Move.Value.Height);
-                if (!moveResult.HasErrors)
+            message.Move.Match(
+                Some: move =>
                 {
-                    _state = new MandelbrotState(moveResult.MandelbrotSize, moveResult.MaxIterations);
-                }
+                    var moveResult = _service.Move(_state, move.Vx, move.Vy, move.Width, move.Height);
+                    if (!moveResult.HasErrors)
+                    {
+                        _state = new MandelbrotState(moveResult.MandelbrotSize, moveResult.MaxIterations);
+                        draw.OnNext(moveResult);
+                    }
+                },
+                None: () => { });
 
-                draw.OnNext(moveResult);
-            }
-
-            if (message.Zoom.HasValue)
-            {
-                var zoomResult = _service.Zoom(_state, message.Zoom.Value.ZoomIn, message.Zoom.Value.ZoomCount, message.Zoom.Value.X, message.Zoom.Value.Y, message.Zoom.Value.Width, message.Zoom.Value.Height);
-                if (!zoomResult.HasErrors)
+            message.Zoom.Match(
+                Some: zoom =>
                 {
-                    _state = new MandelbrotState(zoomResult.MandelbrotSize, zoomResult.MaxIterations);
-                }
+                    var zoomResult = _service.Zoom(_state, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.Width, zoom.Height);
+                    if (!zoomResult.HasErrors)
+                    {
+                        _state = new MandelbrotState(zoomResult.MandelbrotSize, zoomResult.MaxIterations);
+                        draw.OnNext(zoomResult);
+                    }
+                },
+                None: () => { });
 
-                draw.OnNext(zoomResult);
-            }
         }, new ExecutionDataflowBlockOptions() { BoundedCapacity = -1 });
     }
 
