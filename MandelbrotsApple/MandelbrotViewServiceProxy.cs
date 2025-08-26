@@ -41,35 +41,35 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 .Skip(1)
                 .Select(pair =>
                 {
-                    _serviceAgent.Move(new Move(pair.Item1.Vx, pair.Item1.Vy, pair.Item1.WidthLow, pair.Item1.HeightLow));
+                    _serviceAgent.Tell(new Move(pair.Item1.Vx, pair.Item1.Vy, pair.Item1.WidthLow, pair.Item1.HeightLow));
                     return pair;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(pair => _serviceAgent.Resize(new Resize(pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
+                .Do(pair => _serviceAgent.Tell(new Resize(pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
             )
             .Subscribe();
 
         _mouseWheelSubscription = _mouseWheelSubject
                 .Select(zoom =>
                 {
-                    _serviceAgent.Zoom(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
+                    _serviceAgent.Tell(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
                     return zoom;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(zoom => _serviceAgent.Resize(new Resize(zoom.WidthHigh, zoom.HeightHigh)))
+                .Do(zoom => _serviceAgent.Tell(new Resize(zoom.WidthHigh, zoom.HeightHigh)))
                 .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(iter => _serviceAgent.Iterate(iter));
+            .Subscribe(iter => _serviceAgent.Tell(iter));
 
         _resizeViewSubscription = _resizeViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(resize => _serviceAgent.Resize(resize));
+            .Subscribe(resize => _serviceAgent.Tell(resize));
     }
 
     public void Init(Init init)
-        => _serviceAgent.Init(init);
+        => _serviceAgent.Tell(init);
 
     public void ResizeView(Resize resize)
         => _resizeViewSubject.OnNext(resize);
