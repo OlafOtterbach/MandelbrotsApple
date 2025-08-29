@@ -45,7 +45,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                     return pair;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(pair => _serviceAgent.Tell(new Resize(pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
+                .Do(pair => _serviceAgent.Tell(new Move(pair.Item2.Vx, pair.Item2.Vy, pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
             )
             .Subscribe();
 
