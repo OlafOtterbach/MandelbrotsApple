@@ -1,10 +1,8 @@
 ﻿namespace MandelbrotsApple;
 
-using LaYumba.Functional;
 using MandelbrotsApple.Mandelbrot;
 using System.Reactive.Subjects;
 using System.Threading.Tasks.Dataflow;
-using static LaYumba.Functional.F;
 
 public class MandelbrotViewAgent
 {
@@ -23,7 +21,7 @@ public class MandelbrotViewAgent
             switch (command)
             {
                 case Init init:
-                    var initResult = _service.Init(init.IterationPercentage, init.Width, init.Height);
+                    var initResult = _service.Init(init.Xmin, init.Ymin, init.Xmax, init.Ymax, init.IterationPercentage, init.Width, init.Height);
                     if (!initResult.HasErrors)
                     {
                         _state = new MandelbrotState(initResult.MandelbrotSize, initResult.MaxIterations);

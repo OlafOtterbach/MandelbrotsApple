@@ -2,7 +2,7 @@
 
 public interface MandelbrotCommand { }
 
-public record struct Init(int IterationPercentage, int Width, int Height) : MandelbrotCommand;
+public record struct Init(double Xmin, double Ymin, double Xmax, double Ymax, int IterationPercentage, int Width, int Height) : MandelbrotCommand;
 
 public record struct MaxIteration(int IterationPercentage, int Width, int Height) : MandelbrotCommand;
 

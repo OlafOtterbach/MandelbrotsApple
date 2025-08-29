@@ -4,7 +4,7 @@ namespace MandelbrotsApple;
 
 public interface IMandelbrotViewService
 {
-    MandelbrotResult Init(int iterationPercentage, int width, int height);
+    MandelbrotResult Init(double xmin, double ymin, double xmax, double ymax, int iterationPercentage, int width, int height);
 
     MandelbrotResult Resize(MandelbrotState state, int width, int height);
 

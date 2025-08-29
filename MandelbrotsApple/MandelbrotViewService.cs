@@ -5,10 +5,10 @@ using static MandelbrotsApple.Mandelbrot.View;
 
 public class MandelbrotViewService : IMandelbrotViewService
 {
-    public MandelbrotResult Init(int iterationPercentage, int width, int height)
+    public MandelbrotResult Init(double xmin, double ymin, double xmax, double ymax, int iterationPercentage, int width, int height)
     {
         var maxIterations = GetMaxIteration(iterationPercentage);
-        var result = Initialize(new ImageSize(width, height), maxIterations);
+        var result = Initialize(new MandelbrotSize(new MandelbrotPosition(xmin, ymin), new MandelbrotPosition(xmax, ymax)), new ImageSize(width, height), maxIterations);
         return result;
     }
 

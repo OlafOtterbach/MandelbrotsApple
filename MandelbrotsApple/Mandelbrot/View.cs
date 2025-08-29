@@ -5,11 +5,8 @@ using static Production;
 
 public static class View
 {
-    public static MandelbrotResult Initialize(ImageSize imageSize, int maxIterations)
+    public static MandelbrotResult Initialize(MandelbrotSize mandelbrotSize, ImageSize imageSize, int maxIterations)
     {
-        //var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(0.763, 0.0999), new MandelbrotPosition(0.768, 0.103));
-        var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(-2.5, -3.0), new MandelbrotPosition(3.5, 3.0));
-        //var mandelbrotSize = new MandelbrotSize(new MandelbrotPosition(0.5772661073307556, 0.6309067408680226), new MandelbrotPosition(0.5772670285961581, 0.630907662133425));
         var parameter = new MandelbrotParameter(imageSize, mandelbrotSize, maxIterations);
         var result = GenerateMandelbrotImage(parameter);
 

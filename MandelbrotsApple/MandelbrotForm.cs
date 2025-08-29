@@ -40,7 +40,11 @@ public partial class MandelbrotForm : Form
         if (width > 0 && height > 0)
         {
             var value = sliderIteration.Value;
-            _mandelbrotViewServiceProxy.Init(new Init(value, width, height));
+
+            // 0.763, 0.0999, 0.768, 0.103;
+            // -2.5, -3.0), 3.5, 3.0;
+            // 0.5772661073307556, 0.6309067408680226, 0.5772670285961581, 0.630907662133425;
+            _mandelbrotViewServiceProxy.Init(new Init(-2.5, -3.0, 3.5, 3.0, value, width, height));
         }
     }
 
