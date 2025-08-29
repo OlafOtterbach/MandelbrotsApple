@@ -36,12 +36,12 @@ public class MandelbrotViewAgent
                         draw.OnNext(iterationResult);
                     }
                     break;
-                case Resize resize:
-                    var resizeResult = _service.Resize(_state, resize.Width, resize.Height);
-                    if (!resizeResult.HasErrors)
+                case Refresh refresh:
+                    var refreshResult = _service.Refresh(_state, refresh.Width, refresh.Height);
+                    if (!refreshResult.HasErrors)
                     {
-                        _state = new MandelbrotState(resizeResult.MandelbrotSize, resizeResult.MaxIterations);
-                        draw.OnNext(resizeResult);
+                        _state = new MandelbrotState(refreshResult.MandelbrotSize, refreshResult.MaxIterations);
+                        draw.OnNext(refreshResult);
                     }
                     break;
                 case Move move:

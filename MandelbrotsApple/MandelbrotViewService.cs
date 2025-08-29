@@ -12,10 +12,10 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public MandelbrotResult Resize(MandelbrotState state, int width, int height)
+    public MandelbrotResult Refresh(MandelbrotState state, int width, int height)
     {
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), state.Size, state.MaxIterations);
-        var result = Refresh(mandelbrotParameter);
+        var result = View.Refresh(mandelbrotParameter);
         return result;
     }
 
@@ -23,7 +23,7 @@ public class MandelbrotViewService : IMandelbrotViewService
     {
         var maxIterations = GetMaxIteration(iterationPercentage);
         var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), mandelbrotSize, maxIterations);
-        var result = Refresh(mandelbrotParameter);
+        var result = View.Refresh(mandelbrotParameter);
         return result;
     }
 

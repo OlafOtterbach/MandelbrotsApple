@@ -11,7 +11,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     private readonly Subject<MoveLowAndFinalHigh> _mouseMoveSubject = new();
     private readonly Subject<ZoomLowAndHigh> _mouseWheelSubject = new();
     private readonly Subject<MaxIteration> _maxIterationsSubject = new();
-    private readonly Subject<Resize> _resizeViewSubject = new();
+    private readonly Subject<Refresh> _refreshViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
     private readonly Subject<Unit> _mouseResetSubject = new();
     private readonly MandelbrotViewAgent _serviceAgent;
@@ -19,7 +19,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     private readonly IDisposable _mouseMoveSubscription;
     private readonly IDisposable _mouseWheelSubscription;
     private readonly IDisposable _maxIterationsSubscription;
-    private readonly IDisposable _resizeViewSubscription;
+    private readonly IDisposable _refreshViewSubscription;
 
     private bool _disposed;
 
@@ -56,14 +56,14 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                     return zoom;
                 })
                 .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(zoom => _serviceAgent.Tell(new Resize(zoom.WidthHigh, zoom.HeightHigh)))
+                .Do(zoom => _serviceAgent.Tell(new Refresh(zoom.WidthHigh, zoom.HeightHigh)))
                 .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Sample(TimeSpan.FromMilliseconds(500))
             .Subscribe(iter => _serviceAgent.Tell(iter));
 
-        _resizeViewSubscription = _resizeViewSubject
+        _refreshViewSubscription = _refreshViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
             .Subscribe(resize => _serviceAgent.Tell(resize));
     }
@@ -71,8 +71,8 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     public void Init(Init init)
         => _serviceAgent.Tell(init);
 
-    public void ResizeView(Resize resize)
-        => _resizeViewSubject.OnNext(resize);
+    public void RefreshView(Refresh refresh)
+        => _refreshViewSubject.OnNext(refresh);
 
     public void MaxIterations(MaxIteration maxIteration)
         => _maxIterationsSubject.OnNext(maxIteration);
@@ -95,12 +95,12 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
         _mouseMoveSubscription.Dispose();
         _mouseWheelSubscription.Dispose();
         _maxIterationsSubscription.Dispose();
-        _resizeViewSubscription.Dispose();
+        _refreshViewSubscription.Dispose();
 
         _mouseMoveSubject.Dispose();
         _mouseWheelSubject.Dispose();
         _maxIterationsSubject.Dispose();
-        _resizeViewSubject.Dispose();
+        _refreshViewSubject.Dispose();
         _drawSubject.Dispose();
         _mouseResetSubject.Dispose();
 

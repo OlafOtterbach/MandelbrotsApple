@@ -6,7 +6,7 @@ public record struct Init(double Xmin, double Ymin, double Xmax, double Ymax, in
 
 public record struct MaxIteration(int IterationPercentage, int Width, int Height) : MandelbrotCommand;
 
-public record struct Resize(int Width, int Height) : MandelbrotCommand;
+public record struct Refresh(int Width, int Height) : MandelbrotCommand;
 
 public record struct MoveLowAndFinalHigh(int Vx, int Vy, int EndX, int EndY, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh) : MandelbrotCommand;
 

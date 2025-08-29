@@ -8,7 +8,7 @@ public interface IMandelbrotViewServiceProxy
 
     void Init(Init init);
 
-    void ResizeView(Resize resize);
+    void RefreshView(Refresh resize);
 
     void MaxIterations(MaxIteration iteration);
 

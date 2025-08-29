@@ -55,7 +55,7 @@ public partial class MandelbrotForm : Form
         int height = HeightHigh;
         if (width > 0 && height > 0)
         {
-            _mandelbrotViewServiceProxy.ResizeView(new Resize(width, height));
+            _mandelbrotViewServiceProxy.RefreshView(new Refresh(width, height));
         }
     }
 
