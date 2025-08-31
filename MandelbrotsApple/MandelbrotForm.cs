@@ -87,15 +87,15 @@ public partial class MandelbrotForm : Form
         {
             if (_mouseDown)
             {
-                var endX = XLow(e.X);
+                var x = XLow(e.X);
                 var y = YLow(e.Y);
-                if (endX != _mouseX || y != _mouseY)
+                if (x != _mouseX || y != _mouseY)
                 {
-                    var vx = endX - _mouseX;
+                    var vx = x - _mouseX;
                     var vy = y - _mouseY;
-                    _mouseX = endX;
+                    _mouseX = x;
                     _mouseY = y;
-                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(vx, vy, endX, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(vx, vy, WidthLow, HeightLow, WidthHigh, HeightHigh));
                 }
             }
         }

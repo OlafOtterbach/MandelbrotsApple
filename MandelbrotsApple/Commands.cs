@@ -17,7 +17,7 @@ public record struct MaxIteration(int IterationPercentage, int Width, int Height
 
 public record struct Refresh(int Width, int Height) : MandelbrotCommand;
 
-public record struct MoveLowAndFinalHigh(int Vx, int Vy, int EndX, int EndY, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh) : MandelbrotCommand;
+public record struct MoveLowAndFinalHigh(int Vx, int Vy, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh) : MandelbrotCommand;
 
 public record struct Move(int Vx, int Vy, int Width, int Height) : MandelbrotCommand;
 

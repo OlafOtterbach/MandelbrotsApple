@@ -31,11 +31,25 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
         _mouseMoveSubscription =
             _mouseMoveSubject
+            .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(20)))
+            .Where(buffer => buffer.Count > 0)
+            .Select(buffer =>
+            {
+                int vx = 0;
+                int vy = 0;
+                foreach (var evt in buffer)
+                {
+                    vx += evt.Vx;
+                    vy += evt.Vy;
+                }
+                var move = new MoveLowAndFinalHigh(vx, vy, buffer.First().WidthLow, buffer.First().HeightLow, buffer.Last().WidthHigh, buffer.Last().HeightHigh);
+                return move;
+            })
             .Window(_mouseResetSubject.StartWith(Unit.Default)) // Startet neu bei jedem MouseDown
             .SelectMany(window =>
                 window
                 .Scan(
-                    seed: (new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0, 0, 0), new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0, 0, 0)),
+                    seed: (new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0), new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0)),
                     (acc, curr) => (acc.Item2, curr)
                 )
                 .Skip(1)
