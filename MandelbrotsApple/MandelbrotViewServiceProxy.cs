@@ -64,14 +64,33 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Subscribe();
 
         _mouseWheelSubscription = _mouseWheelSubject
-                .Select(zoom =>
+            .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))
+            .Where(buffer => buffer.Count > 0)
+            .Select(buffer =>
+            {
+                int sum = 0;
+                int x = buffer.First().X;
+                int y = buffer.First().Y;
+                foreach (var evt in buffer)
                 {
-                    _serviceAgent.Tell(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
-                    return zoom;
-                })
-                .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(zoom => _serviceAgent.Tell(new Refresh(zoom.WidthHigh, zoom.HeightHigh)))
-                .Subscribe();
+                    sum += evt.ZoomIn ? evt.ZoomCount : -evt.ZoomCount;
+                }
+                bool zoomIn = sum >= 0;
+                int zoomCount = Math.Abs(sum);
+                var widthLow = buffer.First().WidthLow;
+                var heightLow = buffer.First().HeightLow;
+                var widthHigh = buffer.Last().WidthHigh;
+                var heightHigh = buffer.Last().HeightHigh;
+                return new ZoomLowAndHigh(zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
+            })
+            .Select(zoom =>
+            {
+                _serviceAgent.Tell(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
+                return zoom;
+            })
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .Do(zoom => _serviceAgent.Tell(new Refresh(zoom.WidthHigh, zoom.HeightHigh)))
+            .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Sample(TimeSpan.FromMilliseconds(500))
