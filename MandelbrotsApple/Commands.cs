@@ -1,13 +1,12 @@
-﻿namespace MandelbrotsApple;
+﻿using MandelbrotsApple.Mandelbrot;
+
+namespace MandelbrotsApple;
 
 public interface MandelbrotCommand { }
 
-/*
- Mach mir einen TraceAgent der vom MandelbrotViewAgent alle Kommandos weiter geleitet bekommt und diese bei StartInit in die darin angegebene Datei per Stream schreibt. Und bei Empfang von StipTrace diese Datei schließt.
- */
-
-
 public record struct StartTrace(string Path) : MandelbrotCommand;
+
+public record struct StartAndState(string Path, MandelbrotState State) : MandelbrotCommand;
 
 public record struct StopTrace() : MandelbrotCommand;
 
