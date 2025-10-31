@@ -4,6 +4,8 @@ using MandelbrotsApple.Mandelbrot;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Disposables;
+using System.Linq;
 
 public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposable
 {
@@ -29,39 +31,25 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     {
         _serviceAgent = new MandelbrotViewAgent(_service, _drawSubject);
 
-        _mouseMoveSubscription =
-            _mouseMoveSubject
-            .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(20)))
-            .Where(buffer => buffer.Count > 0)
-            .Select(buffer =>
+        // Send low-res moves at most every 20ms (sample latest)
+        // Send a final high-res move when 300ms of inactivity occurred (Throttle)
+        var lowSub = _mouseMoveSubject
+            .Sample(TimeSpan.FromMilliseconds(20))
+            .Subscribe(move =>
             {
-                int vx = 0;
-                int vy = 0;
-                foreach (var evt in buffer)
-                {
-                    vx += evt.Vx;
-                    vy += evt.Vy;
-                }
-                var move = new MoveLowAndFinalHigh(vx, vy, buffer.First().WidthLow, buffer.First().HeightLow, buffer.Last().WidthHigh, buffer.Last().HeightHigh);
-                return move;
-            })
-            .Window(_mouseResetSubject.StartWith(Unit.Default)) // Startet neu bei jedem MouseDown
-            .SelectMany(window =>
-                window
-                .Scan(
-                    seed: (new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0), new MoveLowAndFinalHigh(0, 0, 0, 0, 0, 0)),
-                    (acc, curr) => (acc.Item2, curr)
-                )
-                .Skip(1)
-                .Select(pair =>
-                {
-                    _serviceAgent.Tell(new Move(pair.Item1.Vx, pair.Item1.Vy, pair.Item1.WidthLow, pair.Item1.HeightLow));
-                    return pair;
-                })
-                .Throttle(TimeSpan.FromMilliseconds(300))
-                .Do(pair => _serviceAgent.Tell(new Move(pair.Item2.Vx, pair.Item2.Vy, pair.Item2.WidthHigh, pair.Item2.HeightHigh)))
-            )
-            .Subscribe();
+                // low-resolution move
+                _serviceAgent.Tell(new Move(move.CurrentState, move.mandelbrotMovePosition, move.WidthLow, move.HeightLow));
+            });
+
+        var highSub = _mouseMoveSubject
+            .Throttle(TimeSpan.FromMilliseconds(300))
+            .Subscribe(move =>
+            {
+                // high-resolution final move after inactivity
+                _serviceAgent.Tell(new Move(move.CurrentState,move.mandelbrotMovePosition, move.WidthHigh, move.HeightHigh));
+            });
+
+        _mouseMoveSubscription = new CompositeDisposable(lowSub, highSub);
 
         _mouseWheelSubscription = _mouseWheelSubject
             .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))

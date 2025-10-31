@@ -45,7 +45,7 @@ public class MandelbrotViewAgent
                     }
                     break;
                 case Move move:
-                    var moveResult = _service.Move(_state, move.Vx, move.Vy, move.Width, move.Height);
+                    var moveResult = _service.Move(move.CurrentState, move.MandelbrotMovePosition, move.Width, move.Height);
                     if (!moveResult.HasErrors)
                     {
                         _state = new MandelbrotState(moveResult.MandelbrotSize, moveResult.MaxIterations);

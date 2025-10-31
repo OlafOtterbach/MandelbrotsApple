@@ -67,19 +67,18 @@ public static class View
 
     public static MandelbrotParameter Moving(this MandelbrotMoveParameter moveParameter)
     {
-        var imageVector = moveParameter.MouseVector;
         var imageSize = moveParameter.ImageSize;
         var mandelbrotSize = moveParameter.CurrentMandelbrotSize;
+        var mandelbrotMovePosition = moveParameter.MandelbrotMovePosition;
 
-        var mandelbrotVector = MandelbrotVector(imageVector, imageSize, mandelbrotSize);
-
-        var newXMin = mandelbrotSize.Min.X - mandelbrotVector.Vx;
-        var newYMin = mandelbrotSize.Min.Y - mandelbrotVector.Vy;
-        var newXMax = mandelbrotSize.Max.X - mandelbrotVector.Vx;
-        var newYMax = mandelbrotSize.Max.Y - mandelbrotVector.Vy;
+        var vx = mandelbrotMovePosition.X - mandelbrotSize.Min.X;
+        var vy = mandelbrotMovePosition.Y - mandelbrotSize.Min.Y;
+        var newXMin = mandelbrotSize.Min.X + vx;
+        var newYMin = mandelbrotSize.Min.Y + vy;
+        var newXMax = mandelbrotSize.Max.X + vx;
+        var newYMax = mandelbrotSize.Max.Y + vy;
 
         var movedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));
-
         var movedMandelbrotParameter = new MandelbrotParameter(imageSize, movedMandelbrotSize, moveParameter.MaxIterations);
 
         return movedMandelbrotParameter;

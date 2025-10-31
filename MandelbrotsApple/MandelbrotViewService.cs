@@ -27,10 +27,10 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public MandelbrotResult Move(MandelbrotState state, int vx, int vy, int width, int height)
+    public MandelbrotResult Move(MandelbrotState state, MandelbrotPosition mandelbrotMovePosition, int width, int height)
     {
         var mandelbrotMoveParameter = new MandelbrotMoveParameter(
-            new ImageVector(vx, vy),
+            mandelbrotMovePosition,
             new ImageSize(width, height),
             state.Size,
             state.MaxIterations);
