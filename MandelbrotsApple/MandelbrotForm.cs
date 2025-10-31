@@ -56,7 +56,7 @@ public partial class MandelbrotForm : Form
         int height = HeightHigh;
         if (width > 0 && height > 0)
         {
-            _mandelbrotViewServiceProxy.RefreshView(new Refresh(width, height));
+            _mandelbrotViewServiceProxy.RefreshView(new Refresh(_state, width, height));
         }
     }
 
@@ -143,13 +143,13 @@ public partial class MandelbrotForm : Form
         int wheelClicks = Math.Abs(delta / 120);
         var x = XLow(e.X);
         var y = YLow(e.Y);
-        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(_state, delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
     }
 
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
-        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(_state, value, WidthHigh, HeightHigh));
     }
 
 

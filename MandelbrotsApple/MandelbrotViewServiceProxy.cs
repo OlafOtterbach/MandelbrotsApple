@@ -69,11 +69,12 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 var heightLow = buffer.First().HeightLow;
                 var widthHigh = buffer.Last().WidthHigh;
                 var heightHigh = buffer.Last().HeightHigh;
-                return new ZoomLowAndHigh(zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
+                var currentState = buffer.Last().CurrentState;
+                return new ZoomLowAndHigh(currentState, zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
             })
             .Select(zoom =>
             {
-                _serviceAgent.Tell(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
+                _serviceAgent.Tell(new Zoom(zoom.CurrentState, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
                 return zoom;
             })
             .Throttle(TimeSpan.FromMilliseconds(300))

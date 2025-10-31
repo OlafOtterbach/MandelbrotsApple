@@ -8,8 +8,6 @@ public class MandelbrotViewAgent
 {
     private readonly ActionBlock<MandelbrotCommand> _actionBlock;
 
-    private MandelbrotState _state = MandelbrotState.Empty;
-
     private readonly MandelbrotViewService _service = new MandelbrotViewService();
 
     public MandelbrotViewAgent(MandelbrotViewService viewService, Subject<MandelbrotResult> draw)
@@ -24,23 +22,20 @@ public class MandelbrotViewAgent
                     var initResult = _service.Init(init.Xmin, init.Ymin, init.Xmax, init.Ymax, init.IterationPercentage, init.Width, init.Height);
                     if (!initResult.HasErrors)
                     {
-                        _state = new MandelbrotState(initResult.MandelbrotSize, initResult.MaxIterations);
                         draw.OnNext(initResult);
                     }
                     break;
                 case MaxIteration maxIteration:
-                    var iterationResult = _service.MaxIterations(_state.Size, maxIteration.IterationPercentage, maxIteration.Width, maxIteration.Height);
+                    var iterationResult = _service.MaxIterations(maxIteration.CurrentState.Size, maxIteration.IterationPercentage, maxIteration.Width, maxIteration.Height);
                     if (!iterationResult.HasErrors)
                     {
-                        _state = new MandelbrotState(iterationResult.MandelbrotSize, iterationResult.MaxIterations);
                         draw.OnNext(iterationResult);
                     }
                     break;
                 case Refresh refresh:
-                    var refreshResult = _service.Refresh(_state, refresh.Width, refresh.Height);
+                    var refreshResult = _service.Refresh(refresh.CurrentState, refresh.Width, refresh.Height);
                     if (!refreshResult.HasErrors)
                     {
-                        _state = new MandelbrotState(refreshResult.MandelbrotSize, refreshResult.MaxIterations);
                         draw.OnNext(refreshResult);
                     }
                     break;
@@ -48,15 +43,13 @@ public class MandelbrotViewAgent
                     var moveResult = _service.Move(move.CurrentState, move.MandelbrotMovePosition, move.Width, move.Height);
                     if (!moveResult.HasErrors)
                     {
-                        _state = new MandelbrotState(moveResult.MandelbrotSize, moveResult.MaxIterations);
                         draw.OnNext(moveResult);
                     }
                     break;
                 case Zoom zoom:
-                    var zoomResult = _service.Zoom(_state, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.Width, zoom.Height);
+                    var zoomResult = _service.Zoom(zoom.CurrentState, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.Width, zoom.Height);
                     if (!zoomResult.HasErrors)
                     {
-                        _state = new MandelbrotState(zoomResult.MandelbrotSize, zoomResult.MaxIterations);
                         draw.OnNext(zoomResult);
                     }
                     break;
