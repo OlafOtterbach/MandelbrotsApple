@@ -46,10 +46,11 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Subscribe(move =>
             {
                 // high-resolution final move after inactivity
-                _serviceAgent.Tell(new Move(move.CurrentState,move.mandelbrotMovePosition, move.WidthHigh, move.HeightHigh));
+                _serviceAgent.Tell(new Move(move.CurrentState, move.mandelbrotMovePosition, move.WidthHigh, move.HeightHigh));
             });
 
         _mouseMoveSubscription = new CompositeDisposable(lowSub, highSub);
+
 
         var duringWheel = _mouseWheelSubject
             .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))
@@ -72,10 +73,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 var currentState = buffer.Last().CurrentState;
                 return new ZoomLowAndHigh(currentState, zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
             })
-            .Subscribe(zoom =>
-            {
-                _serviceAgent.Tell(new Zoom(zoom.CurrentState, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
-            });
+            .Subscribe(zoom => _serviceAgent.Tell(new Zoom(zoom.CurrentState, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow)));
 
         var endWheel = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
