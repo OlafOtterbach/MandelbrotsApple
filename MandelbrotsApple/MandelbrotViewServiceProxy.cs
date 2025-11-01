@@ -78,7 +78,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 return zoom;
             })
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Do(zoom => _serviceAgent.Tell(new Refresh(zoom.WidthHigh, zoom.HeightHigh)))
+            .Do(zoom => _serviceAgent.Tell(new Refresh(zoom.CurrentState, zoom.WidthHigh, zoom.HeightHigh)))
             .Subscribe();
 
         _maxIterationsSubscription = _maxIterationsSubject

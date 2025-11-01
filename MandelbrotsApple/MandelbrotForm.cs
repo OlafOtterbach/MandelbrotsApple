@@ -11,8 +11,9 @@ public partial class MandelbrotForm : Form
     private IMandelbrotViewServiceProxy _mandelbrotViewServiceProxy = new MandelbrotViewServiceProxy();
     private Bitmap? _imageBitmap;
     private bool _mouseDown = false;
-    private int _mouseX = 0;
-    private int _mouseY = 0;
+    private int _mouseDownX = 0;
+    private int _mouseDownY = 0;
+    private MandelbrotSize _mouseDownMandelbrotSize;
     private MandelbrotState _state;
 
     public MandelbrotForm()
@@ -65,8 +66,9 @@ public partial class MandelbrotForm : Form
     {
         if (e.Button == MouseButtons.Left)
         {
-            _mouseX = XLow(e.X);
-            _mouseY = YLow(e.Y);
+            _mouseDownX = e.X;
+            _mouseDownY = e.Y;
+            _mouseDownMandelbrotSize = _state.Size;
             _mouseDown = true;
             _mandelbrotViewServiceProxy.Reset();
         }
@@ -90,19 +92,17 @@ public partial class MandelbrotForm : Form
             {
                 var x = e.X;
                 var y = e.Y;
-                if (x != _mouseX || y != _mouseY)
+                if (x != _mouseDownX || y != _mouseDownY)
                 {
-                    var vx = x - _mouseX;
-                    var vy = y - _mouseY;
-                    _mouseX = x;
-                    _mouseY = y;
+                    var vx = x - _mouseDownX;
+                    var vy = y - _mouseDownY;
 
                     var mandelbrotMovePosition = GetMandelbrotMovePosition(
                         vx,
                         vy,
                         WidthHigh,
                         HeightHigh,
-                        _state.Size);
+                        _mouseDownMandelbrotSize);
 
                     _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(_state, mandelbrotMovePosition, WidthLow, HeightLow, WidthHigh, HeightHigh));
                 }

@@ -1,6 +1,7 @@
 ﻿namespace MandelbrotsApple.Mandelbrot;
 
 using LaYumba.Functional;
+using System.Diagnostics;
 using static Production;
 
 public static class View
