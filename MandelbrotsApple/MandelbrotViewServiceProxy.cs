@@ -1,11 +1,11 @@
 ﻿namespace MandelbrotsApple;
 
 using MandelbrotsApple.Mandelbrot;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Disposables;
-using System.Linq;
 
 public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposable
 {
@@ -31,29 +31,34 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     {
         _serviceAgent = new MandelbrotViewAgent(_service, _drawSubject);
 
-        // Send low-res moves at most every 20ms (sample latest)
-        // Send a final high-res move when 300ms of inactivity occurred (Throttle)
-        var lowSub = _mouseMoveSubject
-            .Sample(TimeSpan.FromMilliseconds(20))
-            .Subscribe(move =>
+        var moveSub = _mouseMoveSubject
+            .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(10)))
+            .Where(buffer => buffer.Count > 0)
+            .Where(buffer => buffer.Count > 0)
+            .Select(buffer =>
             {
-                // low-resolution move
-                _serviceAgent.Tell(new Move(move.CurrentState, move.mandelbrotMovePosition, move.WidthLow, move.HeightLow));
-            });
+                var vx = buffer.Sum(evt => evt.ImageVx);
+                var vy = buffer.Sum(evt => evt.ImageVy);
+                var widthLow = buffer.First().WidthLow;
+                var heightLow = buffer.First().HeightLow;
+                var widthHigh = buffer.Last().WidthHigh;
+                var heightHigh = buffer.Last().HeightHigh;
+                return new Move(vx, vy, widthLow, heightLow);
 
-        var highSub = _mouseMoveSubject
+            })
+            .Subscribe(move => _serviceAgent.Tell(move));
+
+        var moveEndSub = _mouseMoveSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(move =>
-            {
-                // high-resolution final move after inactivity
-                _serviceAgent.Tell(new Move(move.CurrentState, move.mandelbrotMovePosition, move.WidthHigh, move.HeightHigh));
-            });
+            .Subscribe(move => _serviceAgent.Tell(new Refresh(move.WidthHigh, move.HeightHigh)));
 
-        _mouseMoveSubscription = new CompositeDisposable(lowSub, highSub);
+        _mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
 
 
-        var duringWheel = _mouseWheelSubject
-            .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))
+
+
+        var duringWheelSub = _mouseWheelSubject
+            .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(10)))
             .Where(buffer => buffer.Count > 0)
             .Select(buffer =>
             {
@@ -70,16 +75,15 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 var heightLow = buffer.First().HeightLow;
                 var widthHigh = buffer.Last().WidthHigh;
                 var heightHigh = buffer.Last().HeightHigh;
-                var currentState = buffer.Last().CurrentState;
-                return new ZoomLowAndHigh(currentState, zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
+                return new ZoomLowAndHigh(zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
             })
-            .Subscribe(zoom => _serviceAgent.Tell(new Zoom(zoom.CurrentState, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow)));
+            .Subscribe(zoom => _serviceAgent.Tell(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow)));
 
-        var endWheel = _mouseWheelSubject
+        var endWheelSub = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(zoom => _serviceAgent.Tell(new Refresh(zoom.CurrentState, zoom.WidthHigh, zoom.HeightHigh)));
+            .Subscribe(zoom => _serviceAgent.Tell(new Refresh(zoom.WidthHigh, zoom.HeightHigh)));
 
-        _mouseWheelSubscription = new CompositeDisposable(duringWheel, endWheel);
+        _mouseWheelSubscription = new CompositeDisposable(duringWheelSub, endWheelSub);
 
 
 

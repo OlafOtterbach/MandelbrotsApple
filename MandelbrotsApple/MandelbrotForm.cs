@@ -11,10 +11,8 @@ public partial class MandelbrotForm : Form
     private IMandelbrotViewServiceProxy _mandelbrotViewServiceProxy = new MandelbrotViewServiceProxy();
     private Bitmap? _imageBitmap;
     private bool _mouseDown = false;
-    private int _mouseDownX = 0;
-    private int _mouseDownY = 0;
-    private MandelbrotSize _mouseDownMandelbrotSize;
-    private MandelbrotState _state;
+    private int _mouseX = 0;
+    private int _mouseY = 0;
 
     public MandelbrotForm()
     {
@@ -57,7 +55,7 @@ public partial class MandelbrotForm : Form
         int height = HeightHigh;
         if (width > 0 && height > 0)
         {
-            _mandelbrotViewServiceProxy.RefreshView(new Refresh(_state, width, height));
+            _mandelbrotViewServiceProxy.RefreshView(new Refresh(width, height));
         }
     }
 
@@ -66,9 +64,8 @@ public partial class MandelbrotForm : Form
     {
         if (e.Button == MouseButtons.Left)
         {
-            _mouseDownX = e.X;
-            _mouseDownY = e.Y;
-            _mouseDownMandelbrotSize = _state.Size;
+            _mouseX = XLow(e.X);
+            _mouseY = YLow(e.Y);
             _mouseDown = true;
             _mandelbrotViewServiceProxy.Reset();
         }
@@ -90,51 +87,20 @@ public partial class MandelbrotForm : Form
         {
             if (_mouseDown)
             {
-                var x = e.X;
-                var y = e.Y;
-                if (x != _mouseDownX || y != _mouseDownY)
+                var x = XLow(e.X);
+                var y = YLow(e.Y);
+                if (x != _mouseX || y != _mouseY)
                 {
-                    var vx = x - _mouseDownX;
-                    var vy = y - _mouseDownY;
-
-                    var mandelbrotMovePosition = GetMandelbrotMovePosition(
-                        vx,
-                        vy,
-                        WidthHigh,
-                        HeightHigh,
-                        _mouseDownMandelbrotSize);
-
-                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(_state, mandelbrotMovePosition, WidthLow, HeightLow, WidthHigh, HeightHigh));
+                    var vx = x - _mouseX;
+                    var vy = y - _mouseY;
+                    _mouseX = x;
+                    _mouseY = y;
+                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(vx, vy, WidthLow, HeightLow, WidthHigh, HeightHigh));
                 }
             }
         }
     }
-
-    private static MandelbrotPosition GetMandelbrotMovePosition(
-        double mouseVx,
-        double mouseVy,
-        double windowWidth,
-        double windowHeight,
-        MandelbrotSize mandelbrotSize)
-    {
-        // aspect ratio difference to squared image in y direction
-        var diff = windowWidth - windowHeight;
-        var virtualWindowHeight = windowHeight + diff;
-
-        var mandelbrotMin = mandelbrotSize.Min;
-        var mandelbrotMax = mandelbrotSize.Max;
-        var mandelbrotVx = mouseVx * (mandelbrotMax.X - mandelbrotMin.X) / windowWidth;
-        var mandelbrotVy = mouseVy * (mandelbrotMax.Y - mandelbrotMin.Y) / virtualWindowHeight;
-
-        var newOrigin = new MandelbrotPosition(
-            mandelbrotMin.X - mandelbrotVx,
-            mandelbrotMin.Y - mandelbrotVy);
-
-        return newOrigin;
-    }
-
-
-
+    
 
     // MouseWheel-Event
     private void On_CanvasPanel_MouseWheel(object? sender, MouseEventArgs e)
@@ -143,13 +109,13 @@ public partial class MandelbrotForm : Form
         int wheelClicks = Math.Abs(delta / 120);
         var x = XLow(e.X);
         var y = YLow(e.Y);
-        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(_state, delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
     }
 
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
-        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(_state, value, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, WidthHigh, HeightHigh));
     }
 
 
@@ -172,8 +138,6 @@ public partial class MandelbrotForm : Form
     {
         if (result.HasErrors)
             return;
-
-        _state = new MandelbrotState(result.MandelbrotSize, result.MaxIterations);
 
         if (_imageBitmap == null || _imageBitmap.Width != result.ImageSize.Width || _imageBitmap.Height != result.ImageSize.Height)
         {

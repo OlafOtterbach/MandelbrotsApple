@@ -1,6 +1,7 @@
 ﻿namespace MandelbrotsApple;
 
 using MandelbrotsApple.Mandelbrot;
+using System.Diagnostics;
 using System.Reactive.Subjects;
 using System.Threading.Tasks.Dataflow;
 
@@ -30,7 +31,7 @@ public class MandelbrotViewAgent
                     }
                     break;
                 case MaxIteration maxIteration:
-                    var iterationResult = _service.MaxIterations(maxIteration.CurrentState.Size, maxIteration.IterationPercentage, maxIteration.Width, maxIteration.Height);
+                    var iterationResult = _service.MaxIterations(_state.Size, maxIteration.IterationPercentage, maxIteration.Width, maxIteration.Height);
                     if (!iterationResult.HasErrors)
                     {
                         _state = new MandelbrotState(iterationResult.MandelbrotSize, iterationResult.MaxIterations);
@@ -46,7 +47,7 @@ public class MandelbrotViewAgent
                     }
                     break;
                 case Move move:
-                    var moveResult = _service.Move(move.CurrentState, move.MandelbrotMovePosition, move.Width, move.Height);
+                    var moveResult = _service.Move(_state, move.ImageVx, move.ImageVy, move.Width, move.Height);
                     if (!moveResult.HasErrors)
                     {
                         _state = new MandelbrotState(moveResult.MandelbrotSize, moveResult.MaxIterations);

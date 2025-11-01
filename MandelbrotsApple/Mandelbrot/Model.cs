@@ -40,7 +40,7 @@ public readonly record struct MandelbrotParameter(ImageSize ImageSize, Mandelbro
 
 public readonly record struct MandelbrotZoomParameter(ImagePosition MousePosition, bool ZoomIn, int zoomCount, ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
-public readonly record struct MandelbrotMoveParameter(MandelbrotPosition MandelbrotMovePosition, ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
+public readonly record struct MandelbrotMoveParameter(ImageVector imageMoveVector, ImageSize ImageSize, MandelbrotSize CurrentMandelbrotSize, int MaxIterations);
 
 public readonly record struct MandelbrotResult(byte[] ImageData, ImageSize ImageSize, MandelbrotSize MandelbrotSize, int MaxIterations, ErrorType[] Errors, bool HasErrors);
 

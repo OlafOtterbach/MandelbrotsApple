@@ -6,7 +6,7 @@ using static Errors;
 
 public static class Validation
 {
-    private static readonly double EPSILON = 0.0000001;
+    private static readonly double EPSILON = 0.000000001;
 
 
     public static Validation<MandelbrotZoomParameter> ValidateMandelbrotZoomParameter(this MandelbrotZoomParameter zoomParameter)

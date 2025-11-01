@@ -10,7 +10,7 @@ public interface IMandelbrotViewService
 
     MandelbrotResult MaxIterations(MandelbrotSize mandelbrotSize, int iterationPercentage, int width, int height);
 
-    MandelbrotResult Move(MandelbrotState state, MandelbrotPosition mandelbrotMovePosition, int width, int height);
+    MandelbrotResult Move(MandelbrotState state, int imageVx, int imageVy, int width, int height);
 
     MandelbrotResult Zoom(MandelbrotState state, bool zoomIn, int zoomCount, int x, int y, int width, int height);
 }

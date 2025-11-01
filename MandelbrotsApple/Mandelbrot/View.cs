@@ -70,14 +70,14 @@ public static class View
     {
         var imageSize = moveParameter.ImageSize;
         var mandelbrotSize = moveParameter.CurrentMandelbrotSize;
-        var mandelbrotMovePosition = moveParameter.MandelbrotMovePosition;
+        var imageMoveVector = moveParameter.imageMoveVector;
 
-        var vx = mandelbrotMovePosition.X - mandelbrotSize.Min.X;
-        var vy = mandelbrotMovePosition.Y - mandelbrotSize.Min.Y;
-        var newXMin = mandelbrotSize.Min.X + vx;
-        var newYMin = mandelbrotSize.Min.Y + vy;
-        var newXMax = mandelbrotSize.Max.X + vx;
-        var newYMax = mandelbrotSize.Max.Y + vy;
+        var mandelbrotMoveVector = MandelbrotVector(imageMoveVector, imageSize, mandelbrotSize);
+
+        var newXMin = mandelbrotSize.Min.X - mandelbrotMoveVector.Vx;
+        var newYMin = mandelbrotSize.Min.Y - mandelbrotMoveVector.Vy;
+        var newXMax = mandelbrotSize.Max.X - mandelbrotMoveVector.Vx;
+        var newYMax = mandelbrotSize.Max.Y - mandelbrotMoveVector.Vy;
 
         var movedMandelbrotSize = new MandelbrotSize(new MandelbrotPosition(newXMin, newYMin), new MandelbrotPosition(newXMax, newYMax));
         var movedMandelbrotParameter = new MandelbrotParameter(imageSize, movedMandelbrotSize, moveParameter.MaxIterations);
