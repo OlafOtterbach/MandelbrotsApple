@@ -51,7 +51,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
         _mouseMoveSubscription = new CompositeDisposable(lowSub, highSub);
 
-        _mouseWheelSubscription = _mouseWheelSubject
+        var duringWheel = _mouseWheelSubject
             .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(100)))
             .Where(buffer => buffer.Count > 0)
             .Select(buffer =>
@@ -72,14 +72,20 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 var currentState = buffer.Last().CurrentState;
                 return new ZoomLowAndHigh(currentState, zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
             })
-            .Select(zoom =>
+            .Subscribe(zoom =>
             {
                 _serviceAgent.Tell(new Zoom(zoom.CurrentState, zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow));
-                return zoom;
-            })
+            });
+
+        var endWheel = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Do(zoom => _serviceAgent.Tell(new Refresh(zoom.CurrentState, zoom.WidthHigh, zoom.HeightHigh)))
-            .Subscribe();
+            .Subscribe(zoom => _serviceAgent.Tell(new Refresh(zoom.CurrentState, zoom.WidthHigh, zoom.HeightHigh)));
+
+        _mouseWheelSubscription = new CompositeDisposable(duringWheel, endWheel);
+
+
+
+
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Sample(TimeSpan.FromMilliseconds(500))
