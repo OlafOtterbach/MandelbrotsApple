@@ -37,20 +37,17 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Where(buffer => buffer.Count > 0)
             .Select(buffer =>
             {
-                var vx = buffer.Sum(evt => evt.ImageVx);
-                var vy = buffer.Sum(evt => evt.ImageVy);
-                var widthLow = buffer.First().WidthLow;
-                var heightLow = buffer.First().HeightLow;
-                var widthHigh = buffer.Last().WidthHigh;
-                var heightHigh = buffer.Last().HeightHigh;
-                return new Move(vx, vy, widthLow, heightLow);
-
+                var vx = buffer.Sum(evt => evt.ImageMoveVector.Vx);
+                var vy = buffer.Sum(evt => evt.ImageMoveVector.Vy);
+                var imageMoveVector = new ImageVector(vx, vy);
+                var imageSizeLow = buffer.First().ImageSizeLow;
+                return new Move(imageMoveVector, imageSizeLow);
             })
             .Subscribe(move => _serviceAgent.Tell(move));
 
         var moveEndSub = _mouseMoveSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(move => _serviceAgent.Tell(new Refresh(move.WidthHigh, move.HeightHigh)));
+            .Subscribe(move => _serviceAgent.Tell(new Refresh(move.ImageSizeHigh)));
 
         _mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
 
@@ -63,25 +60,22 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
             .Select(buffer =>
             {
                 int sum = 0;
-                int x = buffer.First().X;
-                int y = buffer.First().Y;
                 foreach (var evt in buffer)
                 {
                     sum += evt.ZoomIn ? evt.ZoomCount : -evt.ZoomCount;
                 }
                 bool zoomIn = sum >= 0;
                 int zoomCount = Math.Abs(sum);
-                var widthLow = buffer.First().WidthLow;
-                var heightLow = buffer.First().HeightLow;
-                var widthHigh = buffer.Last().WidthHigh;
-                var heightHigh = buffer.Last().HeightHigh;
-                return new ZoomLowAndHigh(zoomIn, zoomCount, x, y, widthLow, heightLow, widthHigh, heightHigh);
+                var imagePosition = buffer.First().ImagePosition;
+                var imageSizeLow = buffer.First().ImageSizeLow;
+                var imageSizeHigh = buffer.Last().ImageSizeHigh;
+                return new Zoom(zoomIn, zoomCount, imagePosition, imageSizeLow);
             })
-            .Subscribe(zoom => _serviceAgent.Tell(new Zoom(zoom.ZoomIn, zoom.ZoomCount, zoom.X, zoom.Y, zoom.WidthLow, zoom.HeightLow)));
+            .Subscribe(zoom => _serviceAgent.Tell(zoom));
 
         var endWheelSub = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(zoom => _serviceAgent.Tell(new Refresh(zoom.WidthHigh, zoom.HeightHigh)));
+            .Subscribe(zoom => _serviceAgent.Tell(new Refresh(zoom.ImageSizeHigh)));
 
         _mouseWheelSubscription = new CompositeDisposable(duringWheelSub, endWheelSub);
 

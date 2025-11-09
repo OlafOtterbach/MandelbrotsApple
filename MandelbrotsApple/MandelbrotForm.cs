@@ -44,7 +44,11 @@ public partial class MandelbrotForm : Form
             // 0.763, 0.0999, 0.768, 0.103;
             // -2.5, -3.0), 3.5, 3.0;
             // 0.5772661073307556, 0.6309067408680226, 0.5772670285961581, 0.630907662133425;
-            _mandelbrotViewServiceProxy.Init(new Init(-2.5, -3.0, 3.5, 3.0, value, width, height));
+            var mandelbrotSize = new MandelbrotSize(
+                new MandelbrotPosition(-2.5, -3.0),
+                new MandelbrotPosition(3.5, 3.0));
+            var imageSize = new ImageSize(width, height);
+            _mandelbrotViewServiceProxy.Init(new Init(mandelbrotSize, value, imageSize));
         }
     }
 
@@ -55,7 +59,8 @@ public partial class MandelbrotForm : Form
         int height = HeightHigh;
         if (width > 0 && height > 0)
         {
-            _mandelbrotViewServiceProxy.RefreshView(new Refresh(width, height));
+            var imageSize = new ImageSize(width, height);
+            _mandelbrotViewServiceProxy.RefreshView(new Refresh(imageSize));
         }
     }
 
@@ -95,7 +100,10 @@ public partial class MandelbrotForm : Form
                     var vy = y - _mouseY;
                     _mouseX = x;
                     _mouseY = y;
-                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(vx, vy, WidthLow, HeightLow, WidthHigh, HeightHigh));
+                    var imageMoveVector = new ImageVector(vx, vy);
+                    var imageSizeLow = new ImageSize(WidthLow, HeightLow);
+                    var imageSizeHigh = new ImageSize(WidthHigh, HeightHigh);
+                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(imageMoveVector, imageSizeLow, imageSizeHigh));
                 }
             }
         }
@@ -109,13 +117,16 @@ public partial class MandelbrotForm : Form
         int wheelClicks = Math.Abs(delta / 120);
         var x = XLow(e.X);
         var y = YLow(e.Y);
-        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(delta < 0, wheelClicks, x, y, WidthLow, HeightLow, WidthHigh, HeightHigh));
+        var imagePosition = new ImagePosition(x, y);
+        var imageSizeLow = new ImageSize(WidthLow, HeightLow);
+        var imageSizeHigh = new ImageSize(WidthHigh, HeightHigh);
+        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(delta < 0, wheelClicks, imagePosition, imageSizeLow, imageSizeHigh));
     }
 
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
-        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, WidthHigh, HeightHigh));
+        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, new ImageSize(WidthHigh, HeightHigh)));
     }
 
 

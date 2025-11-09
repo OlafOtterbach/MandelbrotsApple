@@ -4,13 +4,13 @@ namespace MandelbrotsApple;
 
 public interface IMandelbrotViewService
 {
-    MandelbrotResult Init(double xmin, double ymin, double xmax, double ymax, int iterationPercentage, int width, int height);
+    MandelbrotResult Init(MandelbrotSize mandelbrotSize, int iterationPercentage, ImageSize imageSiz);
 
-    MandelbrotResult Refresh(MandelbrotState state, int width, int height);
+    MandelbrotResult Refresh(MandelbrotState state, ImageSize imageSize);
 
-    MandelbrotResult MaxIterations(MandelbrotSize mandelbrotSize, int iterationPercentage, int width, int height);
+    MandelbrotResult MaxIterations(MandelbrotSize mandelbrotSize, int iterationPercentage, ImageSize imageSize);
 
-    MandelbrotResult Move(MandelbrotState state, int imageVx, int imageVy, int width, int height);
+    MandelbrotResult Move(MandelbrotState state, ImageVector imageMoveVector, ImageSize imageSize);
 
-    MandelbrotResult Zoom(MandelbrotState state, bool zoomIn, int zoomCount, int x, int y, int width, int height);
+    MandelbrotResult Zoom(MandelbrotState state, bool zoomIn, int zoomCount, ImagePosition imagePosition, ImageSize imageSize);
 }

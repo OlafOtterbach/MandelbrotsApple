@@ -8,16 +8,16 @@ public record struct StartTrace(string Path) : MandelbrotCommand;
 
 public record struct StopTrace() : MandelbrotCommand;
 
-public record struct Init(double Xmin, double Ymin, double Xmax, double Ymax, int IterationPercentage, int Width, int Height) : MandelbrotCommand;
+public record struct Init(MandelbrotSize MandelbrotSize, int IterationPercentage, ImageSize ImageSize) : MandelbrotCommand;
 
-public record struct MaxIteration(int IterationPercentage, int Width, int Height) : MandelbrotCommand;
+public record struct MaxIteration(int IterationPercentage, ImageSize ImageSize) : MandelbrotCommand;
 
-public record struct Refresh(int Width, int Height) : MandelbrotCommand;
+public record struct Refresh(ImageSize ImageSize) : MandelbrotCommand;
 
-public record struct MoveLowAndFinalHigh(int ImageVx, int ImageVy, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh) : MandelbrotCommand;
+public record struct MoveLowAndFinalHigh(ImageVector ImageMoveVector, ImageSize ImageSizeLow, ImageSize ImageSizeHigh) : MandelbrotCommand;
 
-public record struct Move(int ImageVx, int ImageVy, int Width, int Height) : MandelbrotCommand;
+public record struct Move(ImageVector ImageMoveVector, ImageSize ImageSize) : MandelbrotCommand;
 
-public record struct ZoomLowAndHigh(bool ZoomIn, int ZoomCount, int X, int Y, int WidthLow, int HeightLow, int WidthHigh, int HeightHigh) : MandelbrotCommand;
+public record struct ZoomLowAndHigh(bool ZoomIn, int ZoomCount, ImagePosition ImagePosition, ImageSize ImageSizeLow, ImageSize ImageSizeHigh) : MandelbrotCommand;
 
-public record struct Zoom(bool ZoomIn, int ZoomCount, int X, int Y, int Width, int Height) : MandelbrotCommand;
+public record struct Zoom(bool ZoomIn, int ZoomCount, ImagePosition ImagePosition, ImageSize ImageSize) : MandelbrotCommand;

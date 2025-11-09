@@ -5,33 +5,33 @@ using static MandelbrotsApple.Mandelbrot.View;
 
 public class MandelbrotViewService : IMandelbrotViewService
 {
-    public MandelbrotResult Init(double xmin, double ymin, double xmax, double ymax, int iterationPercentage, int width, int height)
+    public MandelbrotResult Init(MandelbrotSize mandelbrotSize, int iterationPercentage, ImageSize imageSize)
     {
         var maxIterations = GetMaxIteration(iterationPercentage);
-        var result = Initialize(new MandelbrotSize(new MandelbrotPosition(xmin, ymin), new MandelbrotPosition(xmax, ymax)), new ImageSize(width, height), maxIterations);
+        var result = Initialize(mandelbrotSize, imageSize, maxIterations);
         return result;
     }
 
-    public MandelbrotResult Refresh(MandelbrotState state, int width, int height)
+    public MandelbrotResult Refresh(MandelbrotState state, ImageSize imageSize)
     {
-        var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), state.Size, state.MaxIterations);
+        var mandelbrotParameter = new MandelbrotParameter(imageSize, state.Size, state.MaxIterations);
         var result = View.Refresh(mandelbrotParameter);
         return result;
     }
 
-    public MandelbrotResult MaxIterations(MandelbrotSize mandelbrotSize, int iterationPercentage, int width, int height)
+    public MandelbrotResult MaxIterations(MandelbrotSize mandelbrotSize, int iterationPercentage, ImageSize imageSize)
     {
         var maxIterations = GetMaxIteration(iterationPercentage);
-        var mandelbrotParameter = new MandelbrotParameter(new ImageSize(width, height), mandelbrotSize, maxIterations);
+        var mandelbrotParameter = new MandelbrotParameter(imageSize, mandelbrotSize, maxIterations);
         var result = View.Refresh(mandelbrotParameter);
         return result;
     }
 
-    public MandelbrotResult Move(MandelbrotState state, int imageVx, int imageVy, int width, int height)
+    public MandelbrotResult Move(MandelbrotState state, ImageVector imageMoveVector, ImageSize imageSize)
     {
         var mandelbrotMoveParameter = new MandelbrotMoveParameter(
-            new ImageVector(imageVx, imageVy),
-            new ImageSize(width, height),
+            imageMoveVector,
+            imageSize,
             state.Size,
             state.MaxIterations);
 
@@ -40,13 +40,13 @@ public class MandelbrotViewService : IMandelbrotViewService
         return result;
     }
 
-    public MandelbrotResult Zoom(MandelbrotState state, bool zoomIn, int zoomCount, int x, int y, int width, int height)
+    public MandelbrotResult Zoom(MandelbrotState state, bool zoomIn, int zoomCount, ImagePosition imagePosition, ImageSize imageSize)
     {
         var mandelbrotZoomParameter = new MandelbrotZoomParameter(
-            new ImagePosition(x, y),
+            imagePosition,
             zoomIn,
             zoomCount,
-            new ImageSize(width, height),
+            imageSize,
             state.Size,
             state.MaxIterations);
 

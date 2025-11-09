@@ -70,7 +70,7 @@ public static class View
     {
         var imageSize = moveParameter.ImageSize;
         var mandelbrotSize = moveParameter.CurrentMandelbrotSize;
-        var imageMoveVector = moveParameter.imageMoveVector;
+        var imageMoveVector = moveParameter.ImageMoveVector;
 
         var mandelbrotMoveVector = MandelbrotVector(imageMoveVector, imageSize, mandelbrotSize);
 
