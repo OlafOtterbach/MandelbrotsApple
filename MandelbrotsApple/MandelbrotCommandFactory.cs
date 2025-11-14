@@ -1,9 +1,8 @@
 ﻿namespace MandelbrotsApple;
 
 using MandelbrotsApple.Mandelbrot;
-using static MandelbrotsApple.Mandelbrot.View;
 
-public static class EventConverter
+public static class MandelbrotCommandFactory
 {
     public static Func<MandelbrotState, MandelbrotResult> CreateInit(this Init init)
         => state => View.Initialize(init.InitToParameter(state));
@@ -17,12 +16,14 @@ public static class EventConverter
     public static Func<MandelbrotState, MandelbrotResult> CreateMove(this Move move)
         => state => View.Move(move.MoveToMoveParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> CreateRefresh(this Move move)
+    public static Func<MandelbrotState, MandelbrotResult> CreateRefresh(this MoveLowAndFinalHigh move)
         => state => View.Refresh(move.MoveToParameter(state));
 
     public static Func<MandelbrotState, MandelbrotResult> CreateZoom(this Zoom zoom)
         => state => View.Zoom(zoom.ZoomToZoomParameter(state));
 
+    public static Func<MandelbrotState, MandelbrotResult> CreateRefresh(this ZoomLowAndFinalHigh zoomLowAndFinalHigh)
+        => state => View.Refresh(zoomLowAndFinalHigh.ZoomToParameter(state));
 
 
 
@@ -32,7 +33,7 @@ public static class EventConverter
         var maxIterationValue = GetMaxIteration(init.IterationPercentage);
         return new MandelbrotParameter(
             ImageSize: init.ImageSize,
-            CurrentMandelbrotSize: state.Size,
+            CurrentMandelbrotSize: init.MandelbrotSize,
             MaxIterations: maxIterationValue);
     }
 
@@ -53,10 +54,10 @@ public static class EventConverter
             MaxIterations: state.MaxIterations);
     }
 
-    private static MandelbrotParameter MoveToParameter(this Move move, MandelbrotState state)
+    private static MandelbrotParameter MoveToParameter(this MoveLowAndFinalHigh move, MandelbrotState state)
     {
         return new MandelbrotParameter(
-            ImageSize: move.ImageSize,
+            ImageSize: move.ImageSizeHigh,
             CurrentMandelbrotSize: state.Size,
             MaxIterations: state.MaxIterations);
     }
@@ -68,6 +69,14 @@ public static class EventConverter
            ImageSize: move.ImageSize,
            CurrentMandelbrotSize: state.Size,
            MaxIterations: state.MaxIterations);
+    }
+
+    private static MandelbrotParameter ZoomToParameter(this ZoomLowAndFinalHigh zoom, MandelbrotState state)
+    {
+        return new MandelbrotParameter(
+            ImageSize: zoom.ImageSizeHigh,
+            CurrentMandelbrotSize: state.Size,
+            MaxIterations: state.MaxIterations);
     }
 
     private static MandelbrotZoomParameter ZoomToZoomParameter(this Zoom zoom, MandelbrotState state)

@@ -2,7 +2,7 @@
 
 using MandelbrotsApple.Mandelbrot;
 
-public interface IMandelbrotViewServiceProxy
+public interface IMandelbrotViewProxy
 {
     IObservable<MandelbrotResult> DrawObservable { get; }
 
@@ -14,7 +14,7 @@ public interface IMandelbrotViewServiceProxy
 
     void Move(MoveLowAndFinalHigh move);
 
-    void Zoom(ZoomLowAndHigh zoom);
+    void Zoom(ZoomLowAndFinalHigh zoom);
 
     void Reset();
 }

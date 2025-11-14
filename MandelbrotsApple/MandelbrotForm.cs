@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 public partial class MandelbrotForm : Form
 {
-    private IMandelbrotViewServiceProxy _mandelbrotViewServiceProxy = new MandelbrotViewServiceProxy();
+    private IMandelbrotViewProxy _mandelbrotViewServiceProxy = new MandelbrotViewProxy();
     private Bitmap? _imageBitmap;
     private bool _mouseDown = false;
     private int _mouseX = 0;
@@ -120,7 +120,7 @@ public partial class MandelbrotForm : Form
         var imagePosition = new ImagePosition(x, y);
         var imageSizeLow = new ImageSize(WidthLow, HeightLow);
         var imageSizeHigh = new ImageSize(WidthHigh, HeightHigh);
-        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndHigh(delta < 0, wheelClicks, imagePosition, imageSizeLow, imageSizeHigh));
+        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndFinalHigh(delta < 0, wheelClicks, imagePosition, imageSizeLow, imageSizeHigh));
     }
 
     private void On_SliderIteration_Scroll(object sender, EventArgs e)

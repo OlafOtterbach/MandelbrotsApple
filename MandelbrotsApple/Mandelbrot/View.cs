@@ -1,18 +1,12 @@
 ﻿namespace MandelbrotsApple.Mandelbrot;
 
 using LaYumba.Functional;
-using System.Diagnostics;
 using static Production;
 
 public static class View
 {
-    public static MandelbrotResult Initialize(MandelbrotSize mandelbrotSize, ImageSize imageSize, int maxIterations)
-    {
-        var parameter = new MandelbrotParameter(imageSize, mandelbrotSize, maxIterations);
-        var result = GenerateMandelbrotImage(parameter);
-
-        return result;
-    }
+    public static MandelbrotResult Initialize(MandelbrotParameter parameter)
+        => GenerateMandelbrotImage(parameter);
 
     public static MandelbrotResult Refresh(MandelbrotParameter parameter)
         => GenerateMandelbrotImage(parameter);

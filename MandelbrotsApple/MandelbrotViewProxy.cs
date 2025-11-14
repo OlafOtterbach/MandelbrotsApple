@@ -7,11 +7,10 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposable
+public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 {
-    private readonly MandelbrotViewService _service = new MandelbrotViewService();
     private readonly Subject<MoveLowAndFinalHigh> _mouseMoveSubject = new();
-    private readonly Subject<ZoomLowAndHigh> _mouseWheelSubject = new();
+    private readonly Subject<ZoomLowAndFinalHigh> _mouseWheelSubject = new();
     private readonly Subject<MaxIteration> _maxIterationsSubject = new();
     private readonly Subject<Refresh> _refreshViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
@@ -27,9 +26,9 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
     public IObservable<MandelbrotResult> DrawObservable => _drawSubject.AsObservable();
 
-    public MandelbrotViewServiceProxy()
+    public MandelbrotViewProxy()
     {
-        _serviceAgent = new MandelbrotViewAgent(_service, _drawSubject);
+        _serviceAgent = new MandelbrotViewAgent(_drawSubject);
 
         var moveSub = _mouseMoveSubject
             .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(10)))
@@ -43,11 +42,11 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 var imageSizeLow = buffer.First().ImageSizeLow;
                 return new Move(imageMoveVector, imageSizeLow);
             })
-            .Subscribe(move => _serviceAgent.Tell(move));
+            .Subscribe(move => _serviceAgent.Tell(MandelbrotCommandFactory.CreateMove(move)));
 
         var moveEndSub = _mouseMoveSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(move => _serviceAgent.Tell(new Refresh(move.ImageSizeHigh)));
+            .Subscribe(moveLowAndFinalHight => _serviceAgent.Tell(MandelbrotCommandFactory.CreateRefresh(moveLowAndFinalHight)));
 
         _mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
 
@@ -71,11 +70,11 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
                 var imageSizeHigh = buffer.Last().ImageSizeHigh;
                 return new Zoom(zoomIn, zoomCount, imagePosition, imageSizeLow);
             })
-            .Subscribe(zoom => _serviceAgent.Tell(zoom));
+            .Subscribe(zoom => _serviceAgent.Tell(MandelbrotCommandFactory.CreateZoom(zoom)));
 
         var endWheelSub = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(zoom => _serviceAgent.Tell(new Refresh(zoom.ImageSizeHigh)));
+            .Subscribe(zoomLowAndFinalHight => _serviceAgent.Tell(MandelbrotCommandFactory.CreateRefresh(zoomLowAndFinalHight)));
 
         _mouseWheelSubscription = new CompositeDisposable(duringWheelSub, endWheelSub);
 
@@ -85,15 +84,15 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(iter => _serviceAgent.Tell(iter));
+            .Subscribe(iter => _serviceAgent.Tell(MandelbrotCommandFactory.CreateMaxIteration(iter)));
 
         _refreshViewSubscription = _refreshViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(resize => _serviceAgent.Tell(resize));
+            .Subscribe(resize => _serviceAgent.Tell(MandelbrotCommandFactory.CreateRefresh(resize)));
     }
 
     public void Init(Init init)
-        => _serviceAgent.Tell(init);
+        => _serviceAgent.Tell(MandelbrotCommandFactory.CreateInit(init));
 
     public void RefreshView(Refresh refresh)
         => _refreshViewSubject.OnNext(refresh);
@@ -104,7 +103,7 @@ public class MandelbrotViewServiceProxy : IMandelbrotViewServiceProxy, IDisposab
     public void Move(MoveLowAndFinalHigh move)
         => _mouseMoveSubject.OnNext(move);
 
-    public void Zoom(ZoomLowAndHigh zoom)
+    public void Zoom(ZoomLowAndFinalHigh zoom)
         => _mouseWheelSubject.OnNext(zoom);
 
     public void Reset()
