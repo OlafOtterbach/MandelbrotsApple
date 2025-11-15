@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using static MandelbrotViewRequestFactory;
 
 public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 {
@@ -42,11 +43,11 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
                 var imageSizeLow = buffer.First().ImageSizeLow;
                 return new Move(imageMoveVector, imageSizeLow);
             })
-            .Subscribe(move => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestMove(move)));
+            .Subscribe(move => _serviceAgent.Tell(RequestMove(move)));
 
         var moveEndSub = _mouseMoveSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(moveLowAndFinalHight => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestRefresh(moveLowAndFinalHight)));
+            .Subscribe(moveLowAndFinalHight => _serviceAgent.Tell(RequestRefresh(moveLowAndFinalHight)));
 
         _mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
 
@@ -70,11 +71,11 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
                 var imageSizeHigh = buffer.Last().ImageSizeHigh;
                 return new Zoom(zoomIn, zoomCount, imagePosition, imageSizeLow);
             })
-            .Subscribe(zoom => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestZoom(zoom)));
+            .Subscribe(zoom => _serviceAgent.Tell(RequestZoom(zoom)));
 
         var endWheelSub = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(zoomLowAndFinalHight => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestRefresh(zoomLowAndFinalHight)));
+            .Subscribe(zoomLowAndFinalHight => _serviceAgent.Tell(RequestRefresh(zoomLowAndFinalHight)));
 
         _mouseWheelSubscription = new CompositeDisposable(duringWheelSub, endWheelSub);
 
@@ -84,15 +85,15 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(iter => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestMaxIteration(iter)));
+            .Subscribe(iter => _serviceAgent.Tell(RequestMaxIteration(iter)));
 
         _refreshViewSubscription = _refreshViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(resize => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestRefresh(resize)));
+            .Subscribe(resize => _serviceAgent.Tell(RequestRefresh(resize)));
     }
 
     public void Init(Init init)
-        => _serviceAgent.Tell(MandelbrotViewRequestFactory.RequestInit(init));
+        => _serviceAgent.Tell(RequestInit(init));
 
     public void RefreshView(Refresh refresh)
         => _refreshViewSubject.OnNext(refresh);

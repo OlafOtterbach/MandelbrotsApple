@@ -4,25 +4,25 @@ using MandelbrotsApple.Mandelbrot;
 
 public static class MandelbrotViewRequestFactory
 {
-    public static Func<MandelbrotState, MandelbrotResult> RequestInit(this Init init)
+    public static Func<MandelbrotState, MandelbrotResult> RequestInit(Init init)
         => state => View.Initialize(init.InitToParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> RequestMaxIteration(this MaxIteration maxIteration)
+    public static Func<MandelbrotState, MandelbrotResult> RequestMaxIteration(MaxIteration maxIteration)
         => state => View.Refresh(maxIteration.MaxIterationToParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> RequestRefresh(this Refresh refresh)
+    public static Func<MandelbrotState, MandelbrotResult> RequestRefresh(Refresh refresh)
         => state => View.Refresh(refresh.RefreshToParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> RequestMove(this Move move)
+    public static Func<MandelbrotState, MandelbrotResult> RequestMove(Move move)
         => state => View.Move(move.MoveToMoveParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> RequestRefresh(this MoveLowAndFinalHigh move)
+    public static Func<MandelbrotState, MandelbrotResult> RequestRefresh(MoveLowAndFinalHigh move)
         => state => View.Refresh(move.MoveToParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> RequestZoom(this Zoom zoom)
+    public static Func<MandelbrotState, MandelbrotResult> RequestZoom(Zoom zoom)
         => state => View.Zoom(zoom.ZoomToZoomParameter(state));
 
-    public static Func<MandelbrotState, MandelbrotResult> RequestRefresh(this ZoomLowAndFinalHigh zoomLowAndFinalHigh)
+    public static Func<MandelbrotState, MandelbrotResult> RequestRefresh(ZoomLowAndFinalHigh zoomLowAndFinalHigh)
         => state => View.Refresh(zoomLowAndFinalHigh.ZoomToParameter(state));
 
 
