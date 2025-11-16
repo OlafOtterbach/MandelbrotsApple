@@ -9,6 +9,7 @@
         private DoubleBufferedPanel canvasPanel;
         private System.Windows.Forms.TrackBar sliderIteration;
         private System.Windows.Forms.Label labelIterations;
+        private System.Windows.Forms.Button buttonReset;
 
         /// <summary>
         ///  Clean up any resources being used.
@@ -39,6 +40,7 @@
             this.canvasPanel = new DoubleBufferedPanel();
             this.sliderIteration = new System.Windows.Forms.TrackBar();
             this.labelIterations = new System.Windows.Forms.Label();
+            this.buttonReset = new System.Windows.Forms.Button();
 
             // 
             // canvasPanel
@@ -61,7 +63,7 @@
             // sliderIteration
             // 
             this.sliderIteration.Location = new System.Drawing.Point(110, 380); // 20 + 350 + 10
-            this.sliderIteration.Size = new System.Drawing.Size(670, 30);
+            this.sliderIteration.Size = new System.Drawing.Size(600, 30);
             this.sliderIteration.TickStyle = System.Windows.Forms.TickStyle.None;
             this.sliderIteration.Scroll += new System.EventHandler(this.On_SliderIteration_Scroll);
             this.sliderIteration.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Bottom;
@@ -70,11 +72,21 @@
             this.sliderIteration.Value = 0;
 
             // 
+            // buttonReset
+            // 
+            this.buttonReset.Location = new System.Drawing.Point(720, 380);
+            this.buttonReset.Size = new System.Drawing.Size(60, 30);
+            this.buttonReset.Text = "Reset";
+            this.buttonReset.Click += new System.EventHandler(this.On_ButtonReset_Click);
+            this.buttonReset.Anchor = System.Windows.Forms.AnchorStyles.Right | System.Windows.Forms.AnchorStyles.Bottom;
+
+            // 
             // Form1
             // 
             this.Controls.Add(this.canvasPanel);
             this.Controls.Add(this.labelIterations);
             this.Controls.Add(this.sliderIteration);
+            this.Controls.Add(this.buttonReset);
             this.Text = "Form1";
         }
         #endregion

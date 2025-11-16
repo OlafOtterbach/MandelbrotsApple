@@ -35,6 +35,8 @@ public partial class MandelbrotForm : Form
 
     private void On_MandelbrotForm_Load(object? sender, EventArgs e)
     {
+        sliderIteration.Value = 0;
+        
         int width = WidthHigh;
         int height = HeightHigh;
         if (width > 0 && height > 0)
@@ -127,6 +129,11 @@ public partial class MandelbrotForm : Form
     {
         var value = sliderIteration.Value;
         _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, new ImageSize(WidthHigh, HeightHigh)));
+    }
+
+    private void On_ButtonReset_Click(object? sender, EventArgs e)
+    {
+        On_MandelbrotForm_Load(null, null);
     }
 
 
