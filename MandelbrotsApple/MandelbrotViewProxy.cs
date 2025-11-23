@@ -84,7 +84,7 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 
 
         _maxIterationsSubscription = _maxIterationsSubject
-            .Sample(TimeSpan.FromMilliseconds(500))
+            .Throttle(TimeSpan.FromMilliseconds(500))
             .Subscribe(iter => _serviceAgent.Tell(RequestMaxIteration(iter)));
 
         _refreshViewSubscription = _refreshViewSubject
