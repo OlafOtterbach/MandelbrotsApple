@@ -74,7 +74,6 @@ public partial class MandelbrotForm : Form
             _mouseX = XLow(e.X);
             _mouseY = YLow(e.Y);
             _mouseDown = true;
-            _mandelbrotViewServiceProxy.Reset();
         }
     }
 

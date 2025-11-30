@@ -2,7 +2,6 @@
 
 using MandelbrotsApple.Mandelbrot;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -15,7 +14,6 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
     private readonly Subject<MaxIteration> _maxIterationsSubject = new();
     private readonly Subject<Refresh> _refreshViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
-    private readonly Subject<Unit> _mouseResetSubject = new();
     private readonly Action<Func<MandelbrotState, MandelbrotResult>> _tell;
 
     private readonly IDisposable _mouseMoveSubscription;
@@ -29,7 +27,7 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 
     public MandelbrotViewProxy()
     {
-        _tell = MandelbrotViewAgentFactory.Create(_drawSubject);
+        _tell = MandelbrotViewAgentFactory.CreateTellAgent(_drawSubject);
 
         var moveSub = _mouseMoveSubject
             .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(10)))
@@ -107,12 +105,6 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
     public void Zoom(ZoomLowAndFinalHigh zoom)
         => _mouseWheelSubject.OnNext(zoom);
 
-    public void Reset()
-    {
-        _mouseResetSubject.OnNext(Unit.Default);
-    }
-
-
     public void Dispose()
     {
         if (_disposed) return;
@@ -126,7 +118,6 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
         _maxIterationsSubject.Dispose();
         _refreshViewSubject.Dispose();
         _drawSubject.Dispose();
-        _mouseResetSubject.Dispose();
 
         _disposed = true;
         GC.SuppressFinalize(this);

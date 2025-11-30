@@ -6,7 +6,7 @@ using System.Threading.Tasks.Dataflow;
 
 public static class MandelbrotViewAgentFactory
 {
-    public static Action<Func<MandelbrotState, MandelbrotResult>> Create(Subject<MandelbrotResult> draw)
+    public static Action<Func<MandelbrotState, MandelbrotResult>> CreateTellAgent(Subject<MandelbrotResult> draw)
     {
         ActionBlock<Func<MandelbrotState, MandelbrotResult>> actionBlock;
         MandelbrotState state = MandelbrotState.Empty;

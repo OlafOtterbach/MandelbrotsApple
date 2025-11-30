@@ -15,6 +15,4 @@ public interface IMandelbrotViewProxy
     void Move(MoveLowAndFinalHigh move);
 
     void Zoom(ZoomLowAndFinalHigh zoom);
-
-    void Reset();
 }
