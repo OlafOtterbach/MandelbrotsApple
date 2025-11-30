@@ -16,7 +16,7 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
     private readonly Subject<Refresh> _refreshViewSubject = new();
     private readonly Subject<MandelbrotResult> _drawSubject = new();
     private readonly Subject<Unit> _mouseResetSubject = new();
-    private readonly MandelbrotViewAgent _serviceAgent;
+    private readonly Action<Func<MandelbrotState, MandelbrotResult>> _tell;
 
     private readonly IDisposable _mouseMoveSubscription;
     private readonly IDisposable _mouseWheelSubscription;
@@ -29,7 +29,7 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 
     public MandelbrotViewProxy()
     {
-        _serviceAgent = new MandelbrotViewAgent(_drawSubject);
+        _tell = MandelbrotViewAgentFactory.Create(_drawSubject);
 
         var moveSub = _mouseMoveSubject
             .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(10)))
@@ -43,11 +43,11 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
                 var imageSizeLow = buffer.First().ImageSizeLow;
                 return new Move(imageMoveVector, imageSizeLow);
             })
-            .Subscribe(move => _serviceAgent.Tell(RequestMove(move)));
+            .Subscribe(move => _tell(RequestMove(move)));
 
         var moveEndSub = _mouseMoveSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(moveLowAndFinalHight => _serviceAgent.Tell(RequestRefresh(moveLowAndFinalHight)));
+            .Subscribe(moveLowAndFinalHight => _tell(RequestRefresh(moveLowAndFinalHight)));
 
         _mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
 
@@ -71,11 +71,11 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
                 var imageSizeHigh = buffer.Last().ImageSizeHigh;
                 return new Zoom(zoomIn, zoomCount, imagePosition, imageSizeLow);
             })
-            .Subscribe(zoom => _serviceAgent.Tell(RequestZoom(zoom)));
+            .Subscribe(zoom => _tell(RequestZoom(zoom)));
 
         var endWheelSub = _mouseWheelSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(zoomLowAndFinalHight => _serviceAgent.Tell(RequestRefresh(zoomLowAndFinalHight)));
+            .Subscribe(zoomLowAndFinalHight => _tell(RequestRefresh(zoomLowAndFinalHight)));
 
         _mouseWheelSubscription = new CompositeDisposable(duringWheelSub, endWheelSub);
 
@@ -85,15 +85,15 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
 
         _maxIterationsSubscription = _maxIterationsSubject
             .Throttle(TimeSpan.FromMilliseconds(500))
-            .Subscribe(iter => _serviceAgent.Tell(RequestMaxIteration(iter)));
+            .Subscribe(iter => _tell(RequestMaxIteration(iter)));
 
         _refreshViewSubscription = _refreshViewSubject
             .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(resize => _serviceAgent.Tell(RequestRefresh(resize)));
+            .Subscribe(resize => _tell(RequestRefresh(resize)));
     }
 
     public void Init(Init init)
-        => _serviceAgent.Tell(RequestInit(init));
+        => _tell(RequestInit(init));
 
     public void RefreshView(Refresh refresh)
         => _refreshViewSubject.OnNext(refresh);

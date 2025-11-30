@@ -4,27 +4,28 @@ using MandelbrotsApple.Mandelbrot;
 using System.Reactive.Subjects;
 using System.Threading.Tasks.Dataflow;
 
-public class MandelbrotViewAgent
+public static class MandelbrotViewAgentFactory
 {
-    private readonly ActionBlock<Func<MandelbrotState, MandelbrotResult>> _actionBlock;
-
-    private MandelbrotState _state;
-
-    public MandelbrotViewAgent(Subject<MandelbrotResult> draw)
+    public static Action<Func<MandelbrotState, MandelbrotResult>> Create(Subject<MandelbrotResult> draw)
     {
-        _actionBlock = new ActionBlock<Func<MandelbrotState, MandelbrotResult>>(command =>
+        ActionBlock<Func<MandelbrotState, MandelbrotResult>> actionBlock;
+        MandelbrotState state = MandelbrotState.Empty;
+
+        actionBlock = new ActionBlock<Func<MandelbrotState, MandelbrotResult>>(command =>
         {
-            var result = command(_state);
+            var result = command(state);
             if (!result.HasErrors)
             {
-                _state = new MandelbrotState(result.MandelbrotSize, result.MaxIterations);
+                state = new MandelbrotState(result.MandelbrotSize, result.MaxIterations);
                 draw.OnNext(result);
             }
         }, new ExecutionDataflowBlockOptions() { BoundedCapacity = -1 });
-    }
 
-    public void Tell(Func<MandelbrotState, MandelbrotResult> command)
-    {
-        _actionBlock.Post(command);
+        var tell = new Action<Func<MandelbrotState, MandelbrotResult>>(command =>
+        {
+            actionBlock.Post(command);
+        });
+
+        return tell;
     }
 }
