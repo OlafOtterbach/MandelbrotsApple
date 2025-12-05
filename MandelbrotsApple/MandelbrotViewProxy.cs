@@ -6,31 +6,86 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using static MandelbrotViewRequestFactory;
+using static MandelbrotViewAgentFactory;
 
-public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
+public static class MandelbrotViewProxy
 {
-    private readonly Subject<MoveLowAndFinalHigh> _mouseMoveSubject = new();
-    private readonly Subject<ZoomLowAndFinalHigh> _mouseWheelSubject = new();
-    private readonly Subject<MaxIteration> _maxIterationsSubject = new();
-    private readonly Subject<Refresh> _refreshViewSubject = new();
-    private readonly Subject<MandelbrotResult> _drawSubject = new();
-    private readonly Action<Func<MandelbrotState, MandelbrotResult>> _tell;
-
-    private readonly IDisposable _mouseMoveSubscription;
-    private readonly IDisposable _mouseWheelSubscription;
-    private readonly IDisposable _maxIterationsSubscription;
-    private readonly IDisposable _refreshViewSubscription;
-
-    private bool _disposed;
-
-    public IObservable<MandelbrotResult> DrawObservable => _drawSubject.AsObservable();
-
-    public MandelbrotViewProxy()
+    public static Action<IMandelbrotCommand> CreateRequestCall(Subject<MandelbrotResult> resultCallBack)
     {
-        _tell = MandelbrotViewAgentFactory.CreateTellAgent(_drawSubject);
+        var tell = CreateTellAgent(resultCallBack);
+        var doInit = CreateInit(tell);
+        var doRefresh = CreateRefresh(tell);
+        var doMaxIterations = CreateMaxIterations(tell);
+        var doMove = CreateMove(tell);
+        var doZoom = CreateZoom(tell);
+        var doRequest = (IMandelbrotCommand command) =>
+        {
+            switch (command)
+            {
+                case Init init:
+                    doInit(init);
+                    break;
 
-        var moveSub = _mouseMoveSubject
-            .Buffer(() => _mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(10)))
+                case Refresh refresh:
+                    doRefresh(refresh);
+                    break;
+
+                case MaxIteration maxIter:
+                    doMaxIterations(maxIter);
+                    break;
+
+                case MoveLowAndFinalHigh moveLowAndFinal:
+                    doMove(moveLowAndFinal);
+                    break;
+
+                case ZoomLowAndFinalHigh zoomLowAndFinal:
+                    doZoom(zoomLowAndFinal);
+                    break;
+
+                default:
+                    // unknown command 
+                    break;
+            }
+        };
+
+        return doRequest;
+    }
+
+    private static Action<Init> CreateInit(Action<Func<MandelbrotState, MandelbrotResult>> tell)
+    {
+        var doInit = (Init init) => tell(RequestInit(init));
+        return doInit;
+    }
+
+    private static Action<Refresh> CreateRefresh(Action<Func<MandelbrotState, MandelbrotResult>> tell)
+    {
+        var refreshViewSubject = new Subject<Refresh>();
+        var refreshViewSubscription = refreshViewSubject
+            .Sample(TimeSpan.FromMilliseconds(500))
+            .Subscribe(refresh => tell(RequestRefresh(refresh)));
+
+        var doRefresh = (Refresh refresh) => refreshViewSubject.OnNext(refresh);
+        return doRefresh;
+    }
+
+    private static Action<MaxIteration> CreateMaxIterations(Action<Func<MandelbrotState, MandelbrotResult>> tell)
+    {
+        var maxIterationsSubject = new Subject<MaxIteration>();
+
+        var maxIterationsSubscription = maxIterationsSubject
+            .Throttle(TimeSpan.FromMilliseconds(500))
+            .Subscribe(iter => tell(RequestMaxIteration(iter)));
+
+        var doMaxIterations = (MaxIteration maxIterations) => maxIterationsSubject.OnNext(maxIterations);
+        return doMaxIterations;
+    }
+
+    private static Action<MoveLowAndFinalHigh> CreateMove(Action<Func<MandelbrotState, MandelbrotResult>> tell)
+    {
+        var mouseMoveSubject = new Subject<MoveLowAndFinalHigh>();
+
+        var moveSub = mouseMoveSubject
+            .Buffer(() => mouseMoveSubject.Throttle(TimeSpan.FromMilliseconds(10)))
             .Where(buffer => buffer.Count > 0)
             .Where(buffer => buffer.Count > 0)
             .Select(buffer =>
@@ -41,19 +96,25 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
                 var imageSizeLow = buffer.First().ImageSizeLow;
                 return new Move(imageMoveVector, imageSizeLow);
             })
-            .Subscribe(move => _tell(RequestMove(move)));
+            .Subscribe(move => tell(RequestMove(move)));
 
-        var moveEndSub = _mouseMoveSubject
+        var moveEndSub = mouseMoveSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(moveLowAndFinalHight => _tell(RequestRefresh(moveLowAndFinalHight)));
+            .Subscribe(moveLowAndFinalHight => tell(RequestRefresh(moveLowAndFinalHight)));
 
-        _mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
+        var mouseMoveSubscription = new CompositeDisposable(moveSub, moveEndSub);
 
+        var doMove = (MoveLowAndFinalHigh move) => mouseMoveSubject.OnNext(move);
 
+        return doMove;
+    }
 
+    private static Action<ZoomLowAndFinalHigh> CreateZoom(Action<Func<MandelbrotState, MandelbrotResult>> tell)
+    {
+        var zoomSubject = new Subject<ZoomLowAndFinalHigh>();
 
-        var duringWheelSub = _mouseWheelSubject
-            .Buffer(() => _mouseWheelSubject.Throttle(TimeSpan.FromMilliseconds(10)))
+        var duringZoomSub = zoomSubject
+            .Buffer(() => zoomSubject.Throttle(TimeSpan.FromMilliseconds(10)))
             .Where(buffer => buffer.Count > 0)
             .Select(buffer =>
             {
@@ -69,57 +130,16 @@ public class MandelbrotViewProxy : IMandelbrotViewProxy, IDisposable
                 var imageSizeHigh = buffer.Last().ImageSizeHigh;
                 return new Zoom(zoomIn, zoomCount, imagePosition, imageSizeLow);
             })
-            .Subscribe(zoom => _tell(RequestZoom(zoom)));
+            .Subscribe(zoom => tell(RequestZoom(zoom)));
 
-        var endWheelSub = _mouseWheelSubject
+        var endZoomSub = zoomSubject
             .Throttle(TimeSpan.FromMilliseconds(300))
-            .Subscribe(zoomLowAndFinalHight => _tell(RequestRefresh(zoomLowAndFinalHight)));
+            .Subscribe(zoomLowAndFinalHight => tell(RequestRefresh(zoomLowAndFinalHight)));
 
-        _mouseWheelSubscription = new CompositeDisposable(duringWheelSub, endWheelSub);
+        var mouseWheelSubscription = new CompositeDisposable(duringZoomSub, endZoomSub);
 
+        var doZoom = (ZoomLowAndFinalHigh move) => zoomSubject.OnNext(move);
 
-
-
-
-        _maxIterationsSubscription = _maxIterationsSubject
-            .Throttle(TimeSpan.FromMilliseconds(500))
-            .Subscribe(iter => _tell(RequestMaxIteration(iter)));
-
-        _refreshViewSubscription = _refreshViewSubject
-            .Sample(TimeSpan.FromMilliseconds(500))
-            .Subscribe(resize => _tell(RequestRefresh(resize)));
-    }
-
-    public void Init(Init init)
-        => _tell(RequestInit(init));
-
-    public void RefreshView(Refresh refresh)
-        => _refreshViewSubject.OnNext(refresh);
-
-    public void MaxIterations(MaxIteration maxIteration)
-        => _maxIterationsSubject.OnNext(maxIteration);
-
-    public void Move(MoveLowAndFinalHigh move)
-        => _mouseMoveSubject.OnNext(move);
-
-    public void Zoom(ZoomLowAndFinalHigh zoom)
-        => _mouseWheelSubject.OnNext(zoom);
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _mouseMoveSubscription.Dispose();
-        _mouseWheelSubscription.Dispose();
-        _maxIterationsSubscription.Dispose();
-        _refreshViewSubscription.Dispose();
-
-        _mouseMoveSubject.Dispose();
-        _mouseWheelSubject.Dispose();
-        _maxIterationsSubject.Dispose();
-        _refreshViewSubject.Dispose();
-        _drawSubject.Dispose();
-
-        _disposed = true;
-        GC.SuppressFinalize(this);
+        return doZoom;
     }
 }

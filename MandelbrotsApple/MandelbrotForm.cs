@@ -3,12 +3,13 @@ namespace MandelbrotsApple;
 using MandelbrotsApple.Mandelbrot;
 using System.Drawing.Imaging;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 public partial class MandelbrotForm : Form
 {
-    private IMandelbrotViewProxy _mandelbrotViewServiceProxy = new MandelbrotViewProxy();
+    private readonly Action<IMandelbrotCommand> _viewRequest;
     private Bitmap? _imageBitmap;
     private bool _mouseDown = false;
     private int _mouseX = 0;
@@ -18,9 +19,12 @@ public partial class MandelbrotForm : Form
     {
         InitializeComponent();
 
-        _mandelbrotViewServiceProxy.DrawObservable
+        Subject<MandelbrotResult> resultCallBackSubject = new Subject<MandelbrotResult>();
+        var resultObservable = resultCallBackSubject.AsObservable();
+        resultObservable
             .ObserveOn(SynchronizationContext.Current)
             .Subscribe(result => DrawMandelbrotResult(result));
+        _viewRequest = MandelbrotViewProxy.CreateRequestCall(resultCallBackSubject);
 
         this.MinimumSize = new Size(800, 600);
         this.Load += On_MandelbrotForm_Load;
@@ -50,7 +54,7 @@ public partial class MandelbrotForm : Form
                 new MandelbrotPosition(-2.5, -3.0),
                 new MandelbrotPosition(3.5, 3.0));
             var imageSize = new ImageSize(width, height);
-            _mandelbrotViewServiceProxy.Init(new Init(mandelbrotSize, value, imageSize));
+            _viewRequest(new Init(mandelbrotSize, value, imageSize));
         }
     }
 
@@ -62,7 +66,7 @@ public partial class MandelbrotForm : Form
         if (width > 0 && height > 0)
         {
             var imageSize = new ImageSize(width, height);
-            _mandelbrotViewServiceProxy.RefreshView(new Refresh(imageSize));
+            _viewRequest(new Refresh(imageSize));
         }
     }
 
@@ -104,7 +108,7 @@ public partial class MandelbrotForm : Form
                     var imageMoveVector = new ImageVector(vx, vy);
                     var imageSizeLow = new ImageSize(WidthLow, HeightLow);
                     var imageSizeHigh = new ImageSize(WidthHigh, HeightHigh);
-                    _mandelbrotViewServiceProxy.Move(new MoveLowAndFinalHigh(imageMoveVector, imageSizeLow, imageSizeHigh));
+                    _viewRequest(new MoveLowAndFinalHigh(imageMoveVector, imageSizeLow, imageSizeHigh));
                 }
             }
         }
@@ -121,13 +125,13 @@ public partial class MandelbrotForm : Form
         var imagePosition = new ImagePosition(x, y);
         var imageSizeLow = new ImageSize(WidthLow, HeightLow);
         var imageSizeHigh = new ImageSize(WidthHigh, HeightHigh);
-        _mandelbrotViewServiceProxy.Zoom(new ZoomLowAndFinalHigh(delta < 0, wheelClicks, imagePosition, imageSizeLow, imageSizeHigh));
+        _viewRequest(new ZoomLowAndFinalHigh(delta < 0, wheelClicks, imagePosition, imageSizeLow, imageSizeHigh));
     }
 
     private void On_SliderIteration_Scroll(object sender, EventArgs e)
     {
         var value = sliderIteration.Value;
-        _mandelbrotViewServiceProxy.MaxIterations(new MaxIteration(value, new ImageSize(WidthHigh, HeightHigh)));
+        _viewRequest(new MaxIteration(value, new ImageSize(WidthHigh, HeightHigh)));
     }
 
     private void On_ButtonReset_Click(object? sender, EventArgs e)
