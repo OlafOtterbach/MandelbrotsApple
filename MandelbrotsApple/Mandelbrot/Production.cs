@@ -13,8 +13,8 @@ public static class Production
                    validResult => validResult);
 
 
-    public static MandelbrotResult GenerateMandelbrotImage(this Validation<MandelbrotParameter> validatedParameter)
-         => validatedParameter
+    public static MandelbrotResult GenerateMandelbrotImage(this Validation<MandelbrotParameter> modifiedParameter)
+         => modifiedParameter
             .Bind(Validate)
             .Map(MandelbrotImage)
             .Match(ErrorResult,
